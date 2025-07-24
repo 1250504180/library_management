@@ -9,11 +9,11 @@
 ### 1.1 功能需求
 
 #### 1.1.1 用户管理模块
-- ~~**用户添加**：由管理员添加新用户~~
+- **用户添加**：由管理员添加新用户，以及用户注册
 - **用户登录**：用户通过用户名和密码登录，系统生成JWT Token进行身份认证
-- ~~**用户信息管理**：支持用户信息的增删改查操作~~
-- ~~**密码管理**：支持用户密码修改功能~~
-- ~~**用户搜索**：支持按ID、昵称、电话、地址等条件搜索用户~~
+- **用户信息管理**：支持用户信息的增删改查操作
+- **密码管理**：支持用户密码修改功能
+- **用户搜索**：支持按ID、昵称、电话、地址等条件搜索用户
 
 #### 1.1.2 图书管理模块
 - **图书信息管理**：支持图书的增删改查操作，包括编号、书名-中文、书名-外语、作者、译者、出版社、出版日期、库存数量、价格、图书位置、分类标签。
@@ -38,21 +38,12 @@
 - **借阅统计**：统计借阅记录总数
 
 
-
 ### 1.2 非功能需求
 
-#### 1.2.1 性能需求
-- 系统响应时间不超过3秒
-- 支持并发用户数不少于100人
-- 数据库查询优化，支持分页查询
-
-#### 1.2.2 安全需求
 - 使用JWT Token进行用户身份认证
 - 密码加密存储
 - 防止SQL注入攻击
 - 跨域请求控制
-
-#### 1.2.3 可用性需求
 - 系统可用性达到99%以上
 - 提供友好的用户界面
 - 支持多种浏览器访问
@@ -80,7 +71,7 @@ API网关层 (Spring Boot Controller)
 - **ORM框架**：MyBatis Plus 3.4.3.1
 - **身份认证**：JWT (java-jwt 3.18.2)
 - **工具库**：Hutool 5.7.16
-- **前端框架**：Vue.js
+- **前端**：Thymeleaf - 模板引擎
 - **构建工具**：Maven
 
 ### 2.2 数据库设计
@@ -613,8 +604,43 @@ npm run serve
 - 监控API响应时间
 - 监控系统资源使用情况
 
+## 五、环境配置
+
+### 5.1 多环境支持
+本项目支持开发环境(dev)和生产环境(prod)的配置分离：
+
+- `application.properties` - 主配置文件（通用配置）
+- `application-dev.properties` - 开发环境配置
+- `application-prod.properties` - 生产环境配置
+- `application-template.properties` - 配置模板文件
+
+### 5.2 环境切换
+```bash
+# 通过环境变量切换
+export SPRING_PROFILES_ACTIVE=dev  # 开发环境
+export SPRING_PROFILES_ACTIVE=prod # 生产环境
+
+# 通过启动参数切换
+java -jar app.jar --spring.profiles.active=prod
+```
+
+### 5.3 数据库安全配置
+生产环境使用环境变量管理敏感信息：
+```bash
+export DB_URL="jdbc:mysql://your-host:3306/library_management_new"
+export DB_USERNAME="your_username"
+export DB_PASSWORD="your_password"
+```
+
+### 5.4 本地开发配置
+1. 复制 `application-template.properties` 为 `application-local.properties`
+2. 修改数据库连接信息
+3. 设置 `SPRING_PROFILES_ACTIVE=local`
+
+**详细配置说明请参考：[环境配置说明.md](./环境配置说明.md)**
+
 ---
 
 **项目版本**: 0.0.1-SNAPSHOT  
-**最后更新**: 2025-07-01  
+**最后更新**: 2025-01-25  
 **开发团队**: Demo Team

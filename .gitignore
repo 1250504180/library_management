@@ -1,0 +1,72 @@
+# 编译输出
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# IDE 文件
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.eclipse/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+
+# 敏感配置文件 - 重要！
+src/main/resources/application-local.properties
+src/main/resources/application-prod.properties
+*.env
+.env.*
+
+# 上传文件目录
+uploads/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Gradle
+.gradle/
+build/
+
+# Node.js (如果有前端构建)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 备份文件
+*.bak
+*.backup
+
+# 测试覆盖率报告
+coverage/
+*.lcov
+
+# 其他
+*.pid
+*.seed
+*.pid.lock
