@@ -35,6 +35,7 @@
                 <button id="batchUpdateStatus" class="button blue radius-3 op-btn" data-i18n="apply">应用</button>
                 <button id="importExcel" class="button green radius-3 op-btn"><span class="icon-upload"></span> <span data-i18n="import">导入</span></button>
                 <input type="file" id="excelFile" style="display: none;" accept=".xlsx,.xls" />
+                <button id="batchImportFromFile" class="button purple radius-3 op-btn"><span class="icon-library_books"></span> <span data-i18n="batchImport">批量导入</span></button>
                 <button id="exportExcel" class="button orange radius-3 op-btn"><span class="icon-download"></span> <span data-i18n="export">导出</span></button>
 
                 <div class="input-group" style="display:inline-block; float:right;">
@@ -296,6 +297,27 @@
                 javaex.optTip({ content: "导入请求失败", type: "error" });
             }
         });
+    });
+
+    $("#batchImportFromFile").click(function () {
+        // 显示确认对话框
+        if (confirm("确定要从指定的Excel文件批量导入图书数据吗？这将导入中文、英文、印尼文三个工作表的数据。")) {
+            $.ajax({
+                url: "/api/book/importFromSpecificFile",
+                type: "POST",
+                success: function (res) {
+                    if (res.code === 0) {
+                        javaex.message({ content: res.data || "批量导入成功", type: "success" });
+                        loadBooks();
+                    } else {
+                        javaex.optTip({ content: res.msg || "批量导入失败", type: "error" });
+                    }
+                },
+                error: function () {
+                    javaex.optTip({ content: "批量导入请求失败", type: "error" });
+                }
+            });
+        }
     });
 
     $("#exportExcel").click(function () {
