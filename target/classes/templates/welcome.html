@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书推荐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .month-section {
+            margin-bottom: 50px;
+        }
+
+        .month-title {
+            font-size: 2rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            padding: 0 20px;
+            justify-items: center;
+        }
+
+        .book-card {
+            background: transparent;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-image {
+            width: 520px;
+            height: 720px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .book-image:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        .book-image.no-image {
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .book-info {
+            text-align: center;
+            width: 100%;
+        }
+
+        .book-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .book-reason {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 50px 0;
+        }
+
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            margin: 50px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .no-data {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 50px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .month-title {
+                font-size: 1.5rem;
+            }
+            
+            .books-grid {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+            
+            .book-image {
+                width: 320px;
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="pageTitle">图书推荐</h1>
+            <p id="pageDesc">走过路过不要错过，欢迎来到三楼翻译.出版局</p>
+        </div>
+        
+        <div id="content">
+            <div class="loading" id="loading">加载中...</div>
+        </div>
+    </div>
+
+    <script>
+        // 国际化文本
+        const i18n = {
+            zh: {
+                recommendationTitle: "图书推荐",
+                recommendationDesc: "走过路过不要错过，欢迎来到三楼翻译.出版局",
+                loading: "加载中...",
+                noImage: "暂无图片",
+                noRecommendations: "暂无推荐",
+                dataLoadFailed: "数据加载失败",
+                unknownMonth: "未知月份",
+                unknownBook: "未知书名",
+                noReason: "暂无推荐理由",
+                recommendedBy: "推荐人",
+                unknown: "未知"
+            },
+            en: {
+                recommendationTitle: "Book Recommendations",
+                recommendationDesc: "Don't miss out, welcome to the 3rd Floor Translation & Publishing Bureau",
+                loading: "Loading...",
+                noImage: "No Image",
+                noRecommendations: "No recommendations",
+                dataLoadFailed: "Data load failed",
+                unknownMonth: "Unknown Month",
+                unknownBook: "Unknown Book",
+                noReason: "No reason",
+                recommendedBy: "Recommended by",
+                unknown: "Unknown"
+            },
+            id: {
+                recommendationTitle: "Rekomendasi Buku",
+                recommendationDesc: "Jangan sampai terlewat, selamat datang di Biro Terjemahan & Penerbitan Lantai 3",
+                loading: "Memuat...",
+                noImage: "Tidak Ada Gambar",
+                noRecommendations: "Tidak ada rekomendasi",
+                dataLoadFailed: "Gagal memuat data",
+                unknownMonth: "Bulan Tidak Diketahui",
+                unknownBook: "Buku Tidak Diketahui",
+                noReason: "Tidak ada alasan",
+                recommendedBy: "Direkomendasikan oleh",
+                unknown: "Tidak diketahui"
+            }
+        };
+        
+        // 当前语言
+        let currentLang = localStorage.getItem("lang") || "zh";
+        
+        // 初始化页面
+        function initPage() {
+            updatePageText();
+            loadRecommendations();
+        }
+        
+        // 更新页面文本
+        function updatePageText() {
+            const texts = getTexts(currentLang);
+            document.getElementById('pageTitle').textContent = texts.recommendationTitle;
+            document.getElementById('pageDesc').textContent = texts.recommendationDesc;
+            document.getElementById('loading').textContent = texts.loading;
+        }
+        
+        // 获取文本
+        function getTexts(lang) {
+            return i18n[lang] || i18n['zh'];
+        }
+        
+        // 加载推荐数据
+        async function loadRecommendations() {
+            const texts = getTexts(currentLang);
+            try {
+                const response = await fetch('/api/recommendation/search?page=1&size=100');
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+                const data = await response.json();
+                if (data.code === 0 && data.data && data.data.records) {
+                    renderRecommendations(data.data.records);
+                } else {
+                    showError(texts.dataLoadFailed);
+                }
+            } catch (error) {
+                console.error('加载推荐数据失败:', error);
+                showError(texts.dataLoadFailed);
+            }
+        }
+        
+        // 渲染推荐数据
+        function renderRecommendations(recommendations) {
+            const content = document.getElementById('content');
+            const texts = getTexts(currentLang);
+            
+            if (!recommendations || recommendations.length === 0) {
+                content.innerHTML = `<div class="no-data">${texts.noRecommendations}</div>`;
+                return;
+            }
+            
+            // 按月份分组
+            const groupedByMonth = {};
+            recommendations.forEach(item => {
+                const month = item.recommendMonth || texts.unknownMonth;
+                if (!groupedByMonth[month]) {
+                    groupedByMonth[month] = [];
+                }
+                groupedByMonth[month].push(item);
+            });
+            
+            // 生成HTML
+            let html = '';
+            Object.keys(groupedByMonth).sort((a,b)=> {
+                if (a.split('-')[0] = b.split('-')[0]){
+                    if(a.split('-')[1]<b.split('-')[1]){
+                        return 1;
+                    }
+                }else if (a.split('-')[0] < b.split('-')[0]){
+                    return 1;
+                }
+                return -1;
+            }).forEach(month => {
+                html += `
+                    <div class="month-section">
+                        <h2 class="month-title">${month}</h2>
+                        <div class="books-grid">
+                `;
+                
+                groupedByMonth[month].forEach(book => {
+                    const imageHtml = book.imgUrl ? 
+                        `<img src="${book.imgUrl}" alt="${book.bookName || ''}" class="book-image">` :
+                        `<div class="book-image no-image">${texts.noImage}</div>`;
+                    
+                    // html += `
+                    //     <div class="book-card">
+                    //         ${imageHtml}
+                    //         <div class="book-info">
+                    //             <div class="book-title">${book.bookName || texts.unknownBook}</div>
+                    //             // <div class="book-reason">${book.recommendReason || texts.noReason}</div>
+                    //             <div class="book-meta">
+                    //                 <span>${texts.recommendedBy}: ${book.operatorName || texts.unknown}</span>
+                    //                 <span>${book.createTime || ''}</span>
+                    //             </div>
+                    //         </div>
+                    //     </div>
+                    // `;
+                    html += `
+                        <div class="book-card">
+                            ${imageHtml}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            const content = document.getElementById('content');
+            const texts = getTexts(currentLang);
+            const errorMsg = message || texts.dataLoadFailed;
+            content.innerHTML = `<div class="error">${errorMsg}</div>`;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

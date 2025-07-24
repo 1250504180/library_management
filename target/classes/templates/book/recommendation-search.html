@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="recommendationSearch">推荐搜索</title>
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            width: 300px;
+            outline: none;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            background: #667eea;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .search-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .month-section {
+            margin-bottom: 50px;
+        }
+
+        .month-title {
+            font-size: 2rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            padding: 0 20px;
+            justify-items: center;
+        }
+
+        .book-card {
+            background: transparent;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-image {
+            width: 520px;
+            height: 720px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .book-image:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        .book-image.no-image {
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .book-info {
+            text-align: center;
+            width: 100%;
+        }
+
+        .book-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .book-reason {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #333;
+            font-size: 1.2rem;
+            margin: 50px 0;
+        }
+
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            margin: 50px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #333;
+            font-size: 1.2rem;
+            margin: 50px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .month-title {
+                font-size: 1.5rem;
+            }
+            
+            .books-grid {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+            
+            .book-image {
+                width: 320px;
+                height: 450px;
+            }
+            
+            .search-input {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 data-i18n="recommendationSearch">推荐搜索</h1>
+            <p data-i18n="recommendationSearchDesc">发现精选图书推荐</p>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-form">
+                <input id="keyword" type="text" class="search-input" data-i18n-placeholder="recommendationKeywordPlaceholder" placeholder="搜索书籍名称、推荐理由或月份..." />
+                <button id="searchBtn" class="search-btn" onclick="search();" data-i18n="search">搜索</button>
+            </div>
+        </div>
+        
+        <div id="content">
+            <div class="loading" id="loading" data-i18n="loading">加载中...</div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    const lang = localStorage.getItem("lang") || "zh";
+    loadLang(lang);
+
+    var pageSize = 10;
+    var currentPage = 1;
+    var allRecommendations = []; // 存储所有推荐数据
+    var filteredRecommendations = []; // 存储过滤后的数据
+
+    function search() {
+        var keyword = $("#keyword").val().trim().toLowerCase();
+        
+        if (!keyword) {
+            filteredRecommendations = allRecommendations;
+        } else {
+            filteredRecommendations = allRecommendations.filter(function(rec) {
+                return (rec.bookName && rec.bookName.toLowerCase().includes(keyword)) ||
+                       (rec.recommendReason && rec.recommendReason.toLowerCase().includes(keyword)) ||
+                       (rec.recommendMonth && rec.recommendMonth.toString().includes(keyword));
+            });
+        }
+        
+        renderRecommendations();
+    }
+
+    function loadRecommendations() {
+        $("#content").html('<div class="loading" data-i18n="loading">加载中...</div>');
+        
+        $.ajax({
+            type: "GET",
+            url: "/api/recommendation/search",
+            data: {
+                page: 1,
+                size: 1000 // 获取所有数据
+            },
+            success: function(result) {
+                if (result.code !== 0) {
+                    $("#content").html('<div class="error">数据加载失败: ' + (result.msg || '未知错误') + '</div>');
+                    return;
+                }
+                var data = result.data || {};
+                allRecommendations = data.records || [];
+                filteredRecommendations = allRecommendations;
+                renderRecommendations();
+            },
+            error: function() {
+                $("#content").html('<div class="error">网络错误，请稍后重试</div>');
+            }
+        });
+    }
+
+    function renderRecommendations() {
+        if (filteredRecommendations.length === 0) {
+            $("#content").html('<div class="no-data" data-i18n="noRecommendations">暂无推荐数据</div>');
+            return;
+        }
+
+        // 按时间排序（最新的在前面）
+        var sortedRecommendations = filteredRecommendations.slice().sort(function(a, b) {
+            var timeA = new Date(a.createTime || '1970-01-01').getTime();
+            var timeB = new Date(b.createTime || '1970-01-01').getTime();
+            return timeB - timeA; // 降序排列，最新的在前
+        });
+
+        var html = '<div class="books-grid">';
+        
+        sortedRecommendations.forEach(function(rec) {
+            var imageUrl = rec.imgUrl || '';
+            
+            html += '<div class="book-card">';
+            
+            if (imageUrl) {
+                html += '<img src="' + imageUrl + '" alt="推荐图书" class="book-image" />';
+            } else {
+                html += '<div class="book-image no-image" data-i18n="noImage">暂无图片</div>';
+            }
+            
+            html += '</div>';
+        });
+        
+        html += '</div>';
+
+        $("#content").html(html);
+    }
+
+    // 回车键搜索
+    $("#keyword").keypress(function(e) {
+        if (e.which == 13) {
+            search();
+        }
+    });
+
+    $(document).ready(function(){
+        loadRecommendations();
+    });
+</script>
+</body>
+</html>

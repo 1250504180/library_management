@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title data-i18n="addUser">添加用户</title>
+    <link href="../../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        .main { max-width: 480px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #eee; padding: 40px 40px 24px; }
+        .main label { display: block; margin: 16px 0 6px 2px; font-size: 15px; }
+        .main input[type="text"], .main input[type="password"], .main input[type="number"], .main select {
+            width: 100%; height: 36px; border-radius: 4px; border: 1px solid #ddd; padding: 0 10px; font-size: 16px;
+        }
+        .main .btn-row { margin-top: 32px; text-align: center;}
+        .main .btn-row input { min-width: 92px; height: 38px; margin: 0 12px; border-radius: 5px; font-size: 17px; }
+        .required { color: #d20000; font-size: 18px; margin-right: 4px;}
+    </style>
+</head>
+<body>
+<div class="main">
+    <h2 style="text-align:center;margin-bottom:26px;font-weight:500;" data-i18n="addUser">添加用户</h2>
+    <form id="userForm" autocomplete="off">
+        <label for="username"><span class="required">*</span><span data-i18n="username">用户名</span></label>
+        <input type="text" id="username" name="username" required maxlength="18" />
+
+        <label for="nickName" data-i18n="nickName">昵称</label>
+        <input type="text" id="nickName" name="nickName" maxlength="18" />
+
+        <label for="password"><span class="required">*</span><span data-i18n="password">密码</span></label>
+        <input type="password" id="password" name="password" required maxlength="32" />
+
+        <label for="sex" data-i18n="sex">性别</label>
+        <select id="sex" name="sex">
+            <option value="" data-i18n="pleaseSelect">请选择</option>
+            <option value="男" data-i18n="male">男</option>
+            <option value="女" data-i18n="female">女</option>
+        </select>
+
+        <label for="address" data-i18n="address">地址</label>
+        <input type="text" id="address" name="address" maxlength="64" />
+
+        <label for="phone" data-i18n="phone">电话</label>
+        <input type="text" id="phone" name="phone" maxlength="20" />
+
+        <label for="role"><span class="required">*</span><span data-i18n="role">角色</span></label>
+        <select id="role" name="role" required>
+            <option value="" data-i18n="pleaseSelect">请选择</option>
+            <option value="0" data-i18n="admin">管理员</option>
+            <option value="1" data-i18n="user">普通用户</option>
+        </select>
+
+        <label for="status"><span class="required">*</span><span data-i18n="status">状态</span></label>
+        <select id="status" name="status" required>
+            <option value="" data-i18n="pleaseSelect">请选择</option>
+            <option value="0" data-i18n="visible">可用</option>
+            <option value="1" data-i18n="invisible">禁用</option>
+        </select>
+
+        <div class="btn-row">
+            <input type="button" id="back" class="button no" data-i18n-value="back" />
+            <input type="button" id="saveBtn" class="button yes" data-i18n-value="save" />
+        </div>
+    </form>
+</div>
+
+<script>
+    const lang = localStorage.getItem("lang") || "zh";
+    loadLang(lang);
+
+    // 翻译按钮的value属性
+    $("[data-i18n-value]").each(function () {
+        const key = $(this).data("i18n-value");
+        if (i18n[lang] && i18n[lang][key]) {
+            $(this).val(i18n[lang][key]);
+        }
+    });
+
+    $("#back").click(function () {
+        window.location.href = "/reader/reader-list";
+    });
+
+    $("#saveBtn").click(function () {
+        var username = $("#username").val().trim();
+        var password = $("#password").val();
+        var role = $("#role").val();
+        var status = $("#status").val();
+
+        if (!username || !password || role === "" || status === "") {
+            javaex.optTip({ content: i18n[lang]['fillRequired'] || "请填写所有带*的必填项", type: "error" });
+            return;
+        }
+
+        var user = {
+            username: username,
+            nickName: $("#nickName").val().trim(),
+            password: password,
+            sex: $("#sex").val(),
+            address: $("#address").val().trim(),
+            phone: $("#phone").val().trim(),
+            role: role,
+            status: status
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/api/user",
+            contentType: "application/json",
+            data: JSON.stringify(user),
+            success: function (res) {
+                if (res.code === 0) {
+                    javaex.message({ content: i18n[lang]['addSuccess'] || "添加成功", type: "success" });
+                    setTimeout(function () {
+                        window.location.href = "/reader/reader-list";
+                    }, 1200);
+                } else {
+                    javaex.optTip({ content: res.msg || i18n[lang]['addFailed'] || "添加失败", type: "error" });
+                }
+            },
+            error: function () {
+                javaex.optTip({ content: i18n[lang]['requestFailed'] || "请求失败", type: "error" });
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title data-i18n="recommendationMgmt">推荐管理</title>
+    <link href="../../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        .table th, .table td { text-align: center; }
+        .op-btn { margin: 0 3px; }
+        .batch-bar { margin-bottom: 10px; }
+        .flex-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+        .search-group { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+        .dropdown { height: 36px; padding: 6px 8px; border-radius: 4px; }
+        
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .required {
+            color: #d20000;
+            margin-right: 4px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+        
+        .modal-footer button {
+            margin-left: 10px;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="list-content">
+    <div class="block">
+        <h2 data-i18n="recommendationMgmt">推荐管理</h2>
+        <div class="main">
+            <div class="batch-bar flex-row">
+                <div class="action-group" style="display: flex; gap: 10px;">
+                    <button id="batchDelete" class="button red radius-3 op-btn" data-i18n="batchDelete">
+                        <span class="icon-close2"></span> <span data-i18n="batchDelete">批量删除</span>
+                    </button>
+                    <button class="button green radius-3 op-btn" onclick="window.location.href='/book/recommendation-add.html'" data-i18n="addRecommend">新增推荐</button>
+                    <select id="batchStatusSelect" class="dropdown">
+                        <option value="" data-i18n="batchSetStatus">批量设置状态</option>
+                        <option value="1" data-i18n="visible">设为可见</option>
+                        <option value="0" data-i18n="invisible">设为不可见</option>
+                    </select>
+                    <button id="applyBatchStatus" class="button blue op-btn" data-i18n="apply">应用</button>
+                </div>
+                <div class="search-group">
+                    <input type="text" id="keyword" class="text" data-i18n-placeholder="recommendSearch" style="width:250px;" />
+                    <button class="button blue op-btn" onclick="search(true)" data-i18n="search">搜索</button>
+                </div>
+            </div>
+            <table id="table" class="table color2">
+                <thead>
+                <tr align="center">
+                    <th><input type="checkbox" id="selectAll"/></th>
+                    <th data-i18n="id">ID</th>
+                    <th data-i18n="bookName">图书名称</th>
+                    <th data-i18n="recommendImage">推荐图片</th>
+                    <th data-i18n="recommendMonth">推荐月份</th>
+                    <th data-i18n="recommendReason">推荐理由</th>
+                    <th data-i18n="operator">操作人</th>
+                    <th data-i18n="createTime">创建时间</th>
+                    <th data-i18n="status">状态</th>
+                    <th data-i18n="actions">操作</th>
+                </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+            <div class="page">
+                <ul id="page" class="pagination"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑推荐模态框 -->
+<div id="editModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 data-i18n="editRecommendation">编辑推荐</h3>
+            <span class="close" onclick="closeEditModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="editForm">
+                <input type="hidden" id="editId" />
+                
+                <div class="form-group">
+                    <label for="editBookName"><span class="required">*</span><span data-i18n="bookName">图书名称</span></label>
+                    <input type="text" id="editBookName" class="form-control" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="editRecommendMonth"><span class="required">*</span><span data-i18n="recommendMonth">推荐月份</span></label>
+                    <input type="month" id="editRecommendMonth" class="form-control" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="editRecommendReason"><span class="required">*</span><span data-i18n="recommendReason">推荐理由</span></label>
+                    <textarea id="editRecommendReason" class="form-control" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editStatus"><span class="required">*</span><span data-i18n="status">状态</span></label>
+                    <select id="editStatus" class="form-control" required>
+                        <option value="1" data-i18n="visible">可见</option>
+                        <option value="0" data-i18n="invisible">不可见</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editImgFile"><span data-i18n="recommendImage">推荐图片</span></label>
+                    <input type="file" id="editImgFile" accept="image/*" class="form-control" />
+                    <input type="hidden" id="editImgUrl" />
+                    <div id="editImgPreview" style="margin-top: 10px;">
+                        <img id="editPreviewImg" src="" alt="" style="max-width: 200px; max-height: 150px; display: none;" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="button no" onclick="closeEditModal()" data-i18n="cancel">取消</button>
+            <button type="button" class="button yes" onclick="saveEdit()" data-i18n="save">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const lang = localStorage.getItem("lang") || "zh";
+    loadLang(lang);
+
+    var pageSize = 10, currPage = 1;
+
+    function renderRecommends(list) {
+        var html = "";
+        $.each(list, function(i, r) {
+            var imgHtml = r.imgUrl ? "<img src='" + r.imgUrl + "' style='max-width: 50px; max-height: 50px;' />" : "";
+            html += "<tr align='center'>" +
+                "<td><input type='checkbox' class='rowBox' value='"+r.id+"'/></td>" +
+                "<td>"+(r.id||'')+"</td>" +
+                 "<td>"+(r.bookName||'')+"</td>" +
+                 "<td>" + imgHtml + "</td>" +
+                 "<td>"+(r.recommendMonth||'')+"</td>" +
+                 "<td>"+(r.recommendReason||'')+"</td>" +
+                 "<td>"+(r.operatorName||'')+"</td>" +
+                 "<td>"+(r.createTime||'')+"</td>" +
+                "<td>"+((r.status==1)?i18n[lang].visible:i18n[lang].invisible)+"</td>" +
+                "<td>" +
+                    "<button class='button blue empty op-btn' onclick='editRecommend("+r.id+")' style='margin-right: 5px;'>编辑</button>" +
+                    "<button class='button yellow empty op-btn' onclick='deleteRecommend('+r.id+')'>"+i18n[lang].delete+"</button>" +
+                "</td>" +
+                "</tr>";
+        });
+        $("#tbody").html(html);
+        $('#selectAll').prop('checked', false);
+    }
+
+    function renderPage(total, curr, size) {
+        var totalPage = Math.ceil(total / size);
+        $("#page").empty();
+        if(totalPage > 1){
+            javaex.page({
+                id : "page",
+                pageCount : totalPage,
+                currentPage : curr,
+                perPageCount : size,
+                totalNum : total,
+                position : "center",
+                callback : function(rtn) {
+                    currPage = rtn.pageNum;
+                    search(false);
+                }
+            });
+        }
+    }
+
+    function search(updateUrl = false) {
+        var keyword = $('#keyword').val().trim();
+        if (updateUrl) {
+            history.replaceState(null, '', '?keyword=' + encodeURIComponent(keyword) + '&page=1&size=' + pageSize);
+        }
+        $.ajax({
+            type: "GET",
+            url: "/api/recommendation/search",
+            data: { keyword: keyword, page: currPage, size: pageSize },
+            success: function(res) {
+                if (res.code === 0 && res.data) {
+                    var records = res.data.records || res.data;
+                    var total = res.data.total || records.length;
+                    renderRecommends(records);
+                    renderPage(total, res.data.current || 1, res.data.size || pageSize);
+                } else {
+                    $("#tbody").html("<tr><td colspan='9'>" + (res.msg || "加载失败") + "</td></tr>");
+                    renderPage(0, 1, pageSize);
+                }
+            },
+            error: function(){
+                $("#tbody").html("<tr><td colspan='9'>加载失败</td></tr>");
+                renderPage(0, 1, pageSize);
+            }
+        });
+    }
+
+    function getSelectedIds() {
+        return $('.rowBox:checked').map(function(){ return parseInt($(this).val()); }).get();
+    }
+
+    function deleteRecommend(id) {
+        if (confirm(i18n[lang].delete + "?")) {
+            $.ajax({
+                type: "DELETE",
+                url: "/api/recommendation/" + id,
+                success: function(res) {
+                    if (res.code === 0) search(false);
+                    else alert(res.msg || i18n[lang].delete + "失败");
+                }
+            });
+        }
+    }
+
+    $('#batchDelete').click(function() {
+        var ids = getSelectedIds();
+        if (ids.length === 0) return alert(i18n[lang].selectDeleteTips || "请先选择要删除的项");
+        if (confirm(i18n[lang].confirmDelete || "确认批量删除选中项？")) {
+            $.ajax({
+                type: "POST",
+                url: "/api/recommendation/deleteBatch",
+                contentType: "application/json",
+                data: JSON.stringify(ids),
+                success: function(res) {
+                    if (res.code === 0) search(false);
+                    else alert(res.msg || i18n[lang].delete + "失败");
+                }
+            });
+        }
+    });
+
+    $('#applyBatchStatus').click(function () {
+        var ids = getSelectedIds();
+        var status = $('#batchStatusSelect').val();
+        if (!status && status !== "0") return alert(i18n[lang].select || "请选择状态");
+        if (ids.length === 0) return alert(i18n[lang].select || "请选择要更新的项");
+
+        var data = ids.map(id => "ids=" + encodeURIComponent(id)).join("&");
+        data += "&status=" + encodeURIComponent(status);
+
+        $.ajax({
+            type: "POST",
+            url: "/api/recommendation/batchUpdateStatus",
+            data: data,
+            contentType: "application/x-www-form-urlencoded",
+            success: function (res) {
+                if (res.code === 0) search(false);
+                else alert(res.msg || "更新失败");
+            },
+            error: function () {
+                alert("请求失败");
+            }
+        });
+    });
+
+    // 编辑推荐功能
+    function editRecommend(id) {
+        $.ajax({
+            type: "GET",
+            url: "/api/recommendation/detail/" + id,
+            success: function(res) {
+                if (res.code === 0 && res.data) {
+                    const data = res.data;
+                    $('#editId').val(data.id);
+                    $('#editBookName').val(data.bookName || '');
+                    $('#editRecommendMonth').val(data.recommendMonth || '');
+                    $('#editRecommendReason').val(data.recommendReason || '');
+                    $('#editStatus').val(data.status || '1');
+                    $('#editImgUrl').val(data.imgUrl || '');
+                    
+                    // 显示现有图片
+                    if (data.imgUrl) {
+                        $('#editPreviewImg').attr('src', data.imgUrl).show();
+                    } else {
+                        $('#editPreviewImg').hide();
+                    }
+                    
+                    $('#editModal').show();
+                } else {
+                    alert(res.msg || "获取推荐信息失败");
+                }
+            },
+            error: function() {
+                alert("请求失败");
+            }
+        });
+    }
+    
+    function closeEditModal() {
+        $('#editModal').hide();
+        $('#editForm')[0].reset();
+        $('#editPreviewImg').hide();
+    }
+    
+    function saveEdit() {
+        const id = $('#editId').val();
+        const bookName = $('#editBookName').val().trim();
+        const recommendMonth = $('#editRecommendMonth').val();
+        const recommendReason = $('#editRecommendReason').val().trim();
+        const status = $('#editStatus').val();
+        
+        if (!bookName || !recommendMonth || !recommendReason || status === "") {
+            alert("请填写所有必填项");
+            return;
+        }
+        
+        const data = {
+            id: parseInt(id),
+            bookName: bookName,
+            recommendMonth: recommendMonth,
+            recommendReason: recommendReason,
+            status: parseInt(status),
+            imgUrl: $('#editImgUrl').val()
+        };
+        
+        $.ajax({
+            type: "PUT",
+            url: "/api/recommendation",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function(res) {
+                if (res.code === 0) {
+                    alert("更新成功");
+                    closeEditModal();
+                    search(false);
+                } else {
+                    alert(res.msg || "更新失败");
+                }
+            },
+            error: function() {
+                alert("请求失败");
+            }
+        });
+    }
+    
+    $(document).ready(function(){
+        const params = new URLSearchParams(location.search);
+        const keyword = params.get('keyword') || '';
+        const pageParam = params.get('page');
+        const sizeParam = params.get('size');
+        currPage = parseInt(pageParam || '1');
+        pageSize = parseInt(sizeParam || '10');
+
+        $('#keyword').val(keyword);
+        search(false);
+        
+        // 编辑模态框中的图片上传事件
+        $('#editImgFile').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/api/upload",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        if (res.code === 0) {
+                            $('#editImgUrl').val(res.data);
+                            $('#editPreviewImg').attr('src', res.data).show();
+                        } else {
+                            alert(res.msg || "图片上传失败");
+                        }
+                    },
+                    error: function() {
+                        alert("图片上传失败");
+                    }
+                });
+            }
+        });
+        
+        // 点击模态框外部关闭
+        $('#editModal').click(function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+    });
+</script>
+</body>
+</html>

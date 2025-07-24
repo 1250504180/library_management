@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="../javaex/pc/css/icomoon.css" rel="stylesheet" />
+    <link href="../javaex/pc/css/animate.css" rel="stylesheet" />
+    <link href="../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <style>
+    /* 侧边栏切换按钮样式 */
+    .sidebar-toggle {
+        float: left;
+        margin-left: 20px;
+        margin-top: 20px;
+        cursor: pointer;
+        color: #fff;
+        font-size: 24px;
+        transition: color 0.3s ease;
+    }
+    
+    .sidebar-toggle:hover {
+        color: #ccc;
+    }
+    
+    /* 侧边栏过渡动画 */
+    .admin-aside {
+        transition: width 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .admin-mian {
+        transition: padding-left 0.3s ease;
+    }
+    
+    /* 侧边栏收起状态 */
+    .admin-aside-collapsed {
+        width: 60px !important;
+    }
+    
+    .admin-aside-collapsed .menu-box .menu a span,
+    .admin-aside-collapsed .menu-box .menu-item a i.icon-keyboard_arrow_left,
+    .admin-aside-collapsed .menu-box .menu-item ul {
+        display: none !important;
+    }
+    
+    .admin-aside-collapsed .menu-box .menu-item > a {
+        text-align: center;
+        padding-left: 0;
+        padding-right: 0;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+    }
+    
+    .admin-aside-collapsed .menu-box .menu-item > a > i:first-child {
+        margin-right: 0;
+        font-size: 20px;
+        position: static;
+        display: block !important;
+    }
+    
+    /* 收缩状态下菜单项可点击展开侧边栏 */
+    .admin-aside-collapsed .menu-box .menu-item > a {
+        cursor: pointer;
+    }
+    
+    .admin-aside-collapsed .menu-box .menu-item > a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* 主内容区域调整 */
+    .admin-mian-collapsed {
+        padding-left: 60px !important;
+    }
+    
+    /* 菜单项图标调整 */
+    .menu-box .menu-item > a > i {
+        transition: all 0.3s ease;
+    }
+    </style>
+    <script src="../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../javaex/pc/js/common.js"></script>
+    <script src="../javaex/pc/js/javaex.min.js"></script>
+    <script src="../javaex/pc/js/javaex-formVerify.js"></script>
+    <!-- 多语言 -->
+    <script src="/lang/lang.js"></script>
+    <title data-i18n="title">后台管理</title>
+</head>
+<body>
+<div class="admin-navbar">
+    <div class="admin-container-fluid clear">
+        <div class="admin-logo" data-i18n="systemName">图书管理系统</div>
+        <div class="sidebar-toggle" id="sidebarToggle">
+            <i class="icon-grid"></i>
+        </div>
+        <ul class="admin-navbar-nav fr">
+            <li>
+                <a href="javascript:;">
+                    <span data-i18n="welcome">欢迎您</span>，<span id="nickname">加载中…</span>
+                    <select id="langSwitcher" style="margin-left: 10px; padding: 2px 6px;">
+                        <option value="zh">中文</option>
+                        <option value="en">English</option>
+                        <option value="id">Indonesia</option>
+                    </select>
+                </a>
+                <ul class="dropdown-menu" style="right: 10px;">
+                    <li><a href="javascript:void(0);" onclick="logout()" data-i18n="logout">退出当前账号</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="admin-mian">
+    <div class="admin-aside admin-aside-fixed">
+        <div id="admin-toc" class="admin-toc">
+            <div class="menu-box">
+                <div id="menu" class="menu">
+                    <ul>
+                        <li class="menu-item hover">
+                            <a href="javascript:page('welcome');"><i class="icon-home2"></i><span data-i18n="home">首页</span></a>
+                        </li>
+
+                        <li class="menu-item" id="menu-bookcenter" style="display:none;">
+                            <a href="javascript:;"><i class="icon-book"></i><span data-i18n="bookCenter">图书中心</span><i class="icon-keyboard_arrow_left"></i></a>
+                            <ul>
+                                <li><a id="book-catalog" href="javascript:page('book/book-catalog');" data-i18n="bookCatalog">图书目录</a></li>
+                                <li><a id="recommendation-search" href="javascript:page('book/recommendation-search');" data-i18n="recommendationSearch">推荐搜索</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="menu-item" id="menu-usercenter" style="display:none;">
+                            <a href="javascript:;"><i class="icon-user"></i><span data-i18n="userCenter">用户中心</span><i class="icon-keyboard_arrow_left"></i></a>
+                            <ul>
+                                <li><a id="user-info" href="javascript:page('user/user-info');" data-i18n="userInfo">个人信息</a></li>
+                                <li><a id="my-borrows" href="javascript:page('user/my-borrows');" data-i18n="myBorrows">借阅记录</a></li>
+                                <li><a id="comment-list" href="javascript:page('user/comment-list');" data-i18n="commentList">评论记录</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="menu-item" id="menu-book-mgmt" style="display:none;">
+                            <a href="javascript:;"><i class="icon-library_books"></i><span data-i18n="bookMgmt">图书管理</span><i class="icon-keyboard_arrow_left"></i></a>
+                            <ul>
+                                <li><a id="book-list" href="javascript:page('book/book-list');" data-i18n="bookList">图书列表</a></li>
+                                <li><a id="add-book" href="javascript:page('book/book-add');" data-i18n="addBook">图书上架</a></li>
+                                <li><a id="book-comment-system" href="javascript:page('book/book-comment');" data-i18n="bookComment">图书评论</a></li>
+                                <li><a id="book_recommendation-mgmt" href="javascript:page('book/book-recommendation');" data-i18n="recommendationMgmt">推荐管理</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="menu-item" id="menu-borrow-mgmt" style="display:none;">
+                            <a href="javascript:;"><i class="icon-assignment"></i><span data-i18n="borrowMgmt">借阅管理</span><i class="icon-keyboard_arrow_left"></i></a>
+                            <ul>
+                                <li><a id="b-book-borrow" href="javascript:page('borrow/borrow');" data-i18n="borrowBook">借阅图书</a></li>
+                                <li><a id="b-book-back" href="javascript:page('borrow/back');" data-i18n="returnBook">归还图书</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="menu-item" id="menu-user-mgmt" style="display:none;">
+                            <a href="javascript:;"><i class="icon-group"></i><span data-i18n="userMgmt">用户管理</span><i class="icon-keyboard_arrow_left"></i></a>
+                            <ul>
+                                <li><a id="user-list" href="javascript:page('reader/reader-list.html');" data-i18n="userList">用户列表</a></li>
+                                <li><a id="user-add" href="javascript:page('reader/reader-add.html');" data-i18n="addUser">用户添加</a></li>
+                                <li><a id="self-info" href="javascript:page('reader/reader-update.html');" data-i18n="selfInfo">个人中心</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="menu-item" id="stats-menu" style="display:none;">
+                            <a href="javascript:;"><i class="icon-bar-chart"></i><span data-i18n="stats">数据统计</span><i class="icon-keyboard_arrow_left"></i></a>
+                            <ul>
+                                <li><a id="Log-list" href="javascript:page('Dashboard/Log-list.html');" data-i18n="systemLog">系统日志</a></li>
+                                <li><a id="Dashboard" href="javascript:page('Dashboard/Dashboard.html');" data-i18n="dashboard">Dashboard</a></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-markdown">
+        <iframe id="page" src="welcome"></iframe>
+    </div>
+</div>
+
+<script>
+    javaex.menu({ id: "menu", isAutoSelected: true, key: "", url: "xxxx" });
+
+    $(function() {
+        var h = document.documentElement.clientHeight - $("#admin-toc").offset().top - 10;
+        $("#admin-toc").css("height", h + "px");
+        
+        // 侧边栏伸缩功能
+        $("#sidebarToggle").click(function() {
+            $(".admin-aside").toggleClass("admin-aside-collapsed");
+            $(".admin-mian").toggleClass("admin-mian-collapsed");
+            
+            // 保存侧边栏状态到本地存储
+            var isCollapsed = $(".admin-aside").hasClass("admin-aside-collapsed");
+            localStorage.setItem("sidebarCollapsed", isCollapsed);
+        });
+        
+        // 收缩状态下点击菜单项展开侧边栏
+        $(document).on('click', '.admin-aside-collapsed .menu-box .menu-item > a', function(e) {
+            e.preventDefault();
+            // 展开侧边栏
+            $(".admin-aside").removeClass("admin-aside-collapsed");
+            $(".admin-mian").removeClass("admin-mian-collapsed");
+            
+            // 更新本地存储状态
+            localStorage.setItem("sidebarCollapsed", false);
+            
+            // 延迟一点时间后触发原有的菜单点击事件
+            var $this = $(this);
+            setTimeout(function() {
+                $this.trigger('click.original');
+            }, 300);
+        });
+        
+        // 页面加载时恢复侧边栏状态
+        var isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+        if (isCollapsed) {
+            $(".admin-aside").addClass("admin-aside-collapsed");
+            $(".admin-mian").addClass("admin-mian-collapsed");
+        }
+    });
+
+    function logout() {
+        window.location.href = "/login";
+    }
+
+    function page(url) {
+        const lang = localStorage.getItem("lang") || "zh";
+        $("#page").attr("src", url + "?lang=" + lang);
+    }
+
+    $(document).ready(function(){
+        $.getJSON("/api/user/currUser", function(res){
+            if (res.code === 0) {
+                var u = res.data;
+                $("#nickname").text(u.nickName);
+                console.log(u.username)
+                localStorage.setItem("userName", u.username);
+                if (u.role === 1) {
+                    $("#menu-book-mgmt").show();
+                    $("#menu-borrow-mgmt").show();
+                    $("#menu-user-mgmt").show();
+                    $("#stats-menu").show();
+                    $("#menu-bookcenter").show(); // 管理员也可以访问图书中心
+                } else {
+                    $("#menu-bookcenter").show();
+                    $("#menu-usercenter").show();
+                }
+            } else {
+                $("#nickname").text("未知用户");
+            }
+        }).fail(function(){
+            $("#nickname").text("加载失败");
+        });
+
+        const lang = localStorage.getItem("lang") || "zh";
+        $("#langSwitcher").val(lang);
+        loadLang(lang);
+
+        $("#langSwitcher").change(function () {
+            const selectedLang = $(this).val();
+            localStorage.setItem("lang", selectedLang);
+            loadLang(selectedLang);
+            const currentSrc = $("#page").attr("src").split("?")[0];
+            $("#page").attr("src", currentSrc + "?lang=" + selectedLang);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title data-i18n="addRecommendation">新增推荐</title>
+    <link href="../../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        .main {
+            max-width: 430px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #eee;
+            padding: 40px 40px 24px;
+        }
+        .main label {
+            display: block;
+            margin: 16px 0 6px 2px;
+            font-size: 15px;
+        }
+        .main input[type="text"], .main input[type="month"], .main select {
+            width: 100%;
+            height: 36px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            padding: 0 10px;
+            font-size: 16px;
+        }
+        .main .btn-row {
+            margin-top: 32px;
+            text-align: center;
+        }
+        .main .btn-row input {
+            min-width: 92px;
+            height: 38px;
+            margin: 0 12px;
+            border-radius: 5px;
+            font-size: 17px;
+        }
+        .required {
+            color: #d20000;
+            font-size: 18px;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <h2 style="text-align:center;margin-bottom:26px;font-weight:500;" data-i18n="addRecommendation">新增推荐</h2>
+    <form id="recommendForm" autocomplete="off">
+        <label for="bookName"><span class="required">*</span><span data-i18n="bookName">图书名称</span></label>
+        <input type="text" id="bookName" required data-i18n-placeholder="enterBookName" placeholder="请输入图书Name" />
+
+        <label for="recommendMonth"><span class="required">*</span><span data-i18n="recommendMonth">推荐月份</span></label>
+        <input type="month" id="recommendMonth" required />
+
+        <label for="recommendReason"><span class="required">*</span><span data-i18n="recommendReason">推荐理由</span></label>
+        <input type="text" id="recommendReason" required data-i18n-placeholder="enterRecommendReason" placeholder="请输入推荐理由" />
+
+        <label for="status"><span class="required">*</span><span data-i18n="status">状态</span></label>
+        <select id="status" required>
+            <option value="" data-i18n="pleaseSelect">请选择</option>
+            <option value="1" data-i18n="visible">可见</option>
+            <option value="0" data-i18n="invisible">不可见</option>
+        </select>
+
+        <label for="imgFile"><span data-i18n="recommendImage">推荐图片</span></label>
+        <input type="file" id="imgFile" accept="image/*" />
+        <input type="hidden" id="imgUrl" />
+        <div id="imgPreview" style="margin-top: 10px;">
+            <img id="previewImg" src="" alt="" style="max-width: 200px; max-height: 150px; display: none;" />
+        </div>
+
+        <div class="btn-row">
+            <input type="button" id="back" value="返回" class="button no" data-i18n-value="back" />
+            <input type="button" id="submitBtn" value="提交" class="button yes" data-i18n-value="submit" />
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const lang = localStorage.getItem("lang") || "zh";
+
+        // 加载翻译内容（含 title、placeholder、option、button value 等）
+        loadLang(lang);
+
+        // 设置页面标题
+        const titleKey = $("title").attr("data-i18n");
+        if (i18n[lang] && i18n[lang][titleKey]) {
+            document.title = i18n[lang][titleKey];
+        }
+
+        // 图片上传事件
+        $("#imgFile").change(function () {
+            const file = this.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/upload",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.code === 0) {
+                            $("#imgUrl").val(res.data);
+                            $("#previewImg").attr("src", res.data).show();
+                        } else {
+                            javaex.optTip({ content: res.msg || "图片上传失败", type: "error" });
+                        }
+                    },
+                    error: function () {
+                        javaex.optTip({ content: "图片上传失败", type: "error" });
+                    }
+                });
+            }
+        });
+
+        // 返回按钮事件
+        $("#back").click(function () {
+            window.location.href = "/book/book-recommendation";
+        });
+
+        // 提交按钮事件
+        $("#submitBtn").click(function () {
+            const bookName = $("#bookName").val().trim();
+            const recommendMonth = $("#recommendMonth").val();
+            const recommendReason = $("#recommendReason").val().trim();
+            const status = $("#status").val();
+
+            if (!bookName || !recommendMonth || !recommendReason || status === "") {
+                javaex.optTip({ content: i18n[lang]['requiredFields'] || "请填写所有必填项", type: "error" });
+                return;
+            }
+
+            const imgUrl = $("#imgUrl").val();
+
+            const data = {
+                bookName: bookName,
+                recommendMonth: recommendMonth,
+                recommendReason: recommendReason,
+                status: parseInt(status),
+                imgUrl: imgUrl
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/api/recommendation",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res.code === 0) {
+                        javaex.message({ content: i18n[lang]['saveSuccess'] || "新增成功", type: "success" });
+                        setTimeout(() => window.location.href = "/book/book-recommendation", 1500);
+                    } else {
+                        javaex.optTip({ content: res.msg || i18n[lang]['saveFailed'] || "新增失败", type: "error" });
+                    }
+                },
+                error: function () {
+                    javaex.optTip({ content: i18n[lang]['requestFailed'] || "请求失败", type: "error" });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title data-i18n="borrowRecord">借阅记录分页列表</title>
+    <link href="../../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        .table th, .table td { text-align: center; }
+        .op-btn { margin: 0 3px; }
+        .input-group input { width: 100px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+<div class="list-content">
+    <div class="block">
+        <h2 data-i18n="borrowRecord">借阅记录</h2>
+        <div class="main">
+            <div class="batch-bar">
+                <div class="input-group" style="float: right;">
+                    <input id="keyword" type="text" class="text" data-i18n-placeholder="borrowKeyword" />
+                    <button class="button blue" onclick="search();" data-i18n="search">搜索</button>
+                </div>
+            </div>
+            <table class="table color2">
+                <thead>
+                <tr align="center">
+                    <th data-i18n="bookId">图书ID</th>
+                    <th data-i18n="bookName">书名</th>
+                    <th data-i18n="bookNumber">编号</th>
+                    <th data-i18n="lendTime">借出时间</th>
+                    <th data-i18n="dueTime">应还时间</th>
+                    <th data-i18n="returnTime">归还时间</th>
+                    <th data-i18n="borrowDays">借阅天数</th>
+                    <th data-i18n="operatorId">操作员ID</th>
+                    <th data-i18n="remark">备注</th>
+                    <th data-i18n="actions">操作</th>
+                </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+            <div class="page">
+                <ul id="page" class="pagination"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const lang = localStorage.getItem("lang") || "zh";
+    loadLang(lang);
+
+    var pageSize = 10;
+    var currentPage = 1;
+
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get("bookId");
+        const readerId = urlParams.get("readerId");
+
+        if (bookId) $("#bookId").val(bookId);
+        if (readerId) $("#readerId").val(readerId);
+
+        loadRecords();
+    });
+
+    function search() {
+        currentPage = 1;
+        loadRecords();
+    }
+
+    function loadRecords() {
+        const keyword = $("#keyword").val().trim();
+
+        const params = {
+            page: currentPage,
+            size: pageSize
+        };
+        if (keyword) params.keyword = keyword;
+
+        $.ajax({
+            type: "GET",
+            url: "/api/LendRecord",
+            data: params,
+            success: function (res) {
+                if (res.code !== 0) {
+                    $("#tbody").html("<tr><td colspan='10'>" + (res.msg || "加载失败") + "</td></tr>");
+                    return;
+                }
+                const pageData = res.data || {};
+                renderTable(pageData.records || []);
+                renderPage(pageData.total || 0, pageData.current || 1, pageData.size || 10);
+            },
+            error: function () {
+                $("#tbody").html("<tr><td colspan='10' data-i18n='requestFailed'>请求失败</td></tr>");
+            }
+        });
+    }
+
+    function renderTable(data) {
+        let html = "";
+        if (data.length === 0) {
+            html = "<tr><td colspan='10' data-i18n='noRecords'>暂无记录</td></tr>";
+        } else {
+            data.forEach(item => {
+                console.log('userName:', localStorage.getItem("userName"));
+                html += "<tr align='center'>" +
+                    "<td>" + (item.bookId || '') + "</td>" +
+                    "<td>" + (item.bookName || '') + "</td>" +
+                    "<td>" + (item.bookNumber || '') + "</td>" +
+                    "<td>" + (item.lendTime || '') + "</td>" +
+                    "<td>" + (item.dueTime || '') + "</td>" +
+                    "<td>" + (item.returnTime || '') + "</td>" +
+                    "<td>" + (item.borrowDays || '') + "</td>" +
+                    "<td>" + (item.operatorId || '') + "</td>" +
+                    "<td>" + (item.remark || '') + "</td>" +
+                    "<td><button class='button blue radius-3 op-btn' onclick='comment(\"" + (item.bookName || '').replace(/"/g, '&quot;') + "\",\"" + (localStorage.getItem("userName") ? localStorage.getItem("userName") : '') + "\")' data-i18n='comment'>评论</button></td>" +
+                    "</tr>";
+            });
+        }
+        $("#tbody").html(html);
+        loadLang(lang);  // 👈 添加这句让“评论”按钮也能翻译
+    }
+
+
+    function renderPage(total, curr, size) {
+        $("#page").empty();
+        const totalPage = Math.ceil(total / size);
+        if (totalPage > 1) {
+            javaex.page({
+                id: "page",
+                pageCount: totalPage,
+                currentPage: curr,
+                perPageCount: size,
+                isShowJumpPage: false,
+                totalNum: total,
+                position: "center",
+                callback: function (rtn) {
+                    currentPage = rtn.pageNum;
+                    loadRecords();
+                }
+            });
+        }
+    }
+
+    function comment( bookName, userName) {
+        window.location.href = "/user/user-comment.html?&bookName=" + bookName + "&userName=" + userName + "&lang=" + lang;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title data-i18n="systemLog"></title>
+    <link href="../../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        .table th, .table td { text-align: center; }
+        .input-group input { width: 300px; margin-right: 5px; }
+        .input-group { float: right; margin-bottom: 10px; }
+        .batch-bar { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<div class="list-content">
+    <div class="block">
+        <h2 data-i18n="systemLog"></h2>
+        <a href="javascript:history.back();">
+            <button class="button indigo radius-3" style="position: absolute;right: 20px;top: 16px;" data-i18n="back"></button>
+        </a>
+        <div class="main">
+            <div class="batch-bar">
+                <button id="batchDelete" class="button red radius-3 op-btn" data-i18n="batchDelete"></button>
+                <div class="input-group">
+                    <input id="keyword" type="text" class="text" data-i18n-placeholder="logSearch" />
+                    <button id="searchBtn" class="button blue" onclick="search();" data-i18n="search"></button>
+                </div>
+            </div>
+
+            <table id="table" class="table color2">
+                <thead>
+                <tr align="center">
+                    <th><input type="checkbox" id="selectAll" /></th>
+                    <th data-i18n="username"></th>
+                    <th data-i18n="className"></th>
+                    <th data-i18n="methodName"></th>
+                    <th data-i18n="logType"></th>
+                    <th data-i18n="createTime"></th>
+                    <th data-i18n="actions"></th>
+                </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+
+            <div class="page">
+                <ul id="page" class="pagination"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const lang = localStorage.getItem("lang") || "zh";
+    loadLang(lang);
+
+    var pageSize = 10;
+    var currentPage = 1;
+
+    function search() {
+        currentPage = 1;
+        loadLogs();
+    }
+
+    function loadLogs() {
+        var keyword = $("#keyword").val().trim();
+        var params = {
+            page: currentPage,
+            size: pageSize,
+            keyword: keyword
+        };
+
+        $.ajax({
+            type: "GET",
+            url: "/api/log/searches",
+            data: params,
+            success: function(result) {
+                if (result.code !== 0) {
+                    $("#tbody").html("<tr><td colspan='7'>" + (result.msg || "加载失败") + "</td></tr>");
+                    return;
+                }
+                var data = result.data || {};
+                renderTable(data.records || []);
+                renderPage(data.total || 0, data.current || 1, data.size || 10);
+            },
+            error: function() {
+                $("#tbody").html("<tr><td colspan='7'>数据加载失败</td></tr>");
+            }
+        });
+    }
+
+    function renderTable(array) {
+        var text = "";
+        $.each(array, function(index, log) {
+            text += "<tr align='center'>" +
+                "<td><input type='checkbox' class='rowBox' value='"+log.id+"'/></td>" +
+                "<td>"+(log.username||'')+"</td>" +
+                "<td>"+(log.className||'')+"</td>" +
+                "<td>"+(log.methodName||'')+"</td>" +
+                "<td>"+(log.logType||'')+"</td>" +
+                "<td>"+(log.createTime||'')+"</td>" +
+                "<td><button class='button yellow empty op-btn' onclick='deleteLog("+log.id+")'>"+i18n[lang]["delete"]+"</button></td>" +
+                "</tr>";
+        });
+        $("#tbody").html(text);
+    }
+
+    function renderPage(total, curr, size) {
+        var totalPage = Math.ceil(total / size);
+        $("#page").empty();
+        if (totalPage > 1) {
+            javaex.page({
+                id : "page",
+                pageCount : totalPage,
+                currentPage : curr,
+                perPageCount : size,
+                isShowJumpPage : false,
+                totalNum : total,
+                position : "center",
+                callback : function(rtn) {
+                    currentPage = rtn.pageNum;
+                    loadLogs();
+                }
+            });
+        }
+    }
+
+    function deleteLog(id) {
+        $.ajax({
+            url: "/api/log/" + id,
+            type: "DELETE",
+            success: function(res) {
+                if (res.code === 0) {
+                    javaex.message({ content: i18n[lang]["delete"] + "成功", type: "success" });
+                    loadLogs();
+                } else {
+                    javaex.optTip({ content: res.msg || "删除失败", type: "error" });
+                }
+            },
+            error: function() {
+                javaex.optTip({ content: "删除请求失败", type: "error" });
+            }
+        });
+    }
+
+    $("#batchDelete").click(function(){
+        var ids = $(".rowBox:checked").map(function() { return $(this).val(); }).get();
+        if (ids.length === 0) {
+            javaex.optTip({ content: i18n[lang]["delete"] + "：" + "请选择要删除的日志", type: "error" });
+            return;
+        }
+
+        $.ajax({
+            url: "/api/log/deleteBatch",
+            type: "POST",
+            data: JSON.stringify({ ids: ids }),
+            contentType: "application/json",
+            success: function(res) {
+                if (res.code === 0) {
+                    javaex.message({ content: "批量" + i18n[lang]["delete"] + "成功", type: "success" });
+                    loadLogs();
+                } else {
+                    javaex.optTip({ content: res.msg || "批量删除失败", type: "error" });
+                }
+            },
+            error: function() {
+                javaex.optTip({ content: "批量删除请求失败", type: "error" });
+            }
+        });
+    });
+
+    $(document).on('change', '#selectAll', function () {
+        $('.rowBox').prop('checked', this.checked);
+    });
+
+    $(document).on('change', '.rowBox', function () {
+        $('#selectAll').prop('checked', $('.rowBox:checked').length === $('.rowBox').length);
+    });
+
+    $(document).ready(function() {
+        loadLogs();
+    });
+</script>
+</body>
+</html>

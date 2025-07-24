@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title data-i18n="bookDetail">图书详情</title>
+    <link href="../../javaex/pc/css/common.css" rel="stylesheet" />
+    <link href="../../javaex/pc/css/skin/tina.css" rel="stylesheet" />
+    <script src="../../javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script src="../../javaex/pc/js/javaex.min.js"></script>
+    <script src="/lang/lang.js"></script>
+    <style>
+        .detail-container {
+            padding: 20px;
+            background-color: #ffffff;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .book-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .book-cover-large {
+            width: 200px;
+            height: 280px;
+            background: #f5f5f5;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: block;
+        }
+        
+        /* 当图片加载失败时显示默认背景 */
+        .book-cover-large[src=""], .book-cover-large[src*="placeholder"] {
+            background: #f0f0f0 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280"><rect width="200" height="280" fill="%23f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999" font-size="14" font-family="Arial, sans-serif">暂无封面</text></svg>') center center no-repeat;
+            background-size: contain;
+        }
+        
+        .book-main-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .book-title-large {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .book-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .book-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .meta-label {
+            font-weight: bold;
+            color: #555;
+            min-width: 80px;
+            margin-right: 10px;
+        }
+        
+        .meta-value {
+            color: #333;
+            flex: 1;
+        }
+        
+        .book-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-width: 100px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .book-description {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .description-content {
+            line-height: 1.6;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .comments-section {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .comment-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        
+        .comment-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .comment-user {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .comment-date {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .comment-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .star {
+            color: #ffc107;
+            font-size: 14px;
+        }
+        
+        .star.empty {
+            color: #ddd;
+        }
+        
+        .comment-content {
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .no-comments {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="detail-container">
+    <!-- 返回按钮 -->
+        <a href="/book/book-catalog" class="back-btn" data-i18n="back">返回</a>
+    
+    <!-- 图书基本信息 -->
+    <div class="book-header">
+        <img id="bookCover" class="book-cover-large" src="" alt="暂无封面" data-i18n-alt="noCover" />
+        <div class="book-main-info">
+            <div id="bookTitle" class="book-title-large">加载中...</div>
+            <div id="bookSubtitle" class="book-subtitle"></div>
+            <div class="book-meta">
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="author">作者:</span>
+                    <span id="bookAuthor" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="isbn">ISBN:</span>
+                    <span id="bookIsbn" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="publisher">出版社:</span>
+                    <span id="bookPublisher" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="publishDate">出版日期:</span>
+                    <span id="bookPublishDate" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="language">语言:</span>
+                    <span id="bookLanguage" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="translator">译者:</span>
+                    <span id="bookTranslator" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="price">定价:</span>
+                    <span id="bookPrice" class="meta-value">-</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label" data-i18n="location">位置:</span>
+                    <span id="bookLocation" class="meta-value">-</span>
+                </div>
+            </div>
+            <div class="book-stats">
+                <div class="stat-item">
+                    <span id="totalQuantity" class="stat-number">0</span>
+                    <span class="stat-label" data-i18n="total">总数</span>
+                </div>
+                <div class="stat-item">
+                    <span id="availableQuantity" class="stat-number">0</span>
+                    <span class="stat-label" data-i18n="available">可借</span>
+                </div>
+                <div class="stat-item">
+                    <span id="borrowedQuantity" class="stat-number">0</span>
+                    <span class="stat-label" data-i18n="borrowed">已借</span>
+                </div>
+                <div class="stat-item">
+                    <span id="borrowCount" class="stat-number">0</span>
+                    <span class="stat-label" data-i18n="borrowCount">借出次数</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图书描述 -->
+    <div class="book-description">
+        <div class="section-title" data-i18n="bookDescription">图书简介</div>
+        <div id="bookDescriptionContent" class="description-content">加载中...</div>
+    </div>
+    
+    <!-- 评论区域 -->
+    <div class="comments-section">
+        <div class="section-title" data-i18n="bookComments">读者评论</div>
+        <div id="commentsContainer">
+            <div class="loading" data-i18n="loading">加载中...</div>
+        </div>
+        <!-- 分页 -->
+        <div class="pagination-container">
+            <ul id="commentsPagination" class="pagination"></ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const lang = localStorage.getItem("lang") || "zh";
+    loadLang(lang);
+    
+    let bookId = null;
+    let currentCommentsPage = 1;
+    const commentsPageSize = 10;
+    
+    // 页面加载完成后初始化
+    $(document).ready(function() {
+        // 从URL参数获取图书ID
+        bookId = getQueryParam("bookId");
+        if (!bookId) {
+            alert("缺少图书ID参数");
+            history.back();
+            return;
+        }
+        
+        loadBookDetail();
+        loadComments();
+    });
+    
+    // 获取URL参数
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+    
+    // 加载图书详情
+    function loadBookDetail() {
+        $.ajax({
+            type: "GET",
+            url: "/api/book/detail/" + bookId,
+            success: function(result) {
+                if (result.code === 0 && result.data) {
+                    renderBookDetail(result.data);
+                } else {
+                    alert("图书详情加载失败: " + (result.msg || "未知错误"));
+                    history.back();
+                }
+            },
+            error: function() {
+                alert("图书详情加载失败");
+                history.back();
+            }
+        });
+    }
+    
+    // 渲染图书详情
+    function renderBookDetail(book) {
+        // 封面图片处理
+        const bookCoverElement = document.getElementById('bookCover');
+        
+        if (book.coverImage) {
+            // 确保图片路径以/开头，如果不是则添加
+            let imagePath = book.coverImage;
+            if (!imagePath.startsWith('/')) {
+                imagePath = '/' + imagePath;
+            }
+            
+            // 直接设置img标签的src属性
+            bookCoverElement.src = imagePath;
+            bookCoverElement.alt = book.nameCn || book.nameId || '图书封面';
+            
+            // 添加图片加载失败处理
+            bookCoverElement.onerror = function() {
+                console.log('图片加载失败，使用默认显示:', imagePath);
+                this.src = ''; // 设置为空，触发CSS默认背景显示
+                this.alt = '暂无封面';
+            };
+            
+            console.log('设置图片路径:', imagePath);
+        } else {
+            // 没有图片时设置为空，显示默认背景
+            bookCoverElement.src = '';
+            bookCoverElement.alt = '暂无封面';
+            console.log('没有封面图片，显示默认背景');
+        }
+        
+        // 基本信息
+        $("#bookTitle").text(book.nameCn || book.nameId || "未知书名");
+        $("#bookSubtitle").text(book.nameId && book.nameCn !== book.nameId ? book.nameId : "");
+        $("#bookAuthor").text(book.author || "-");
+        $("#bookIsbn").text(book.isbn || "-");
+        $("#bookPublisher").text(book.publisher || "-");
+        $("#bookPublishDate").text(book.publishDate || "-");
+        $("#bookLanguage").text(book.language || "-");
+        $("#bookTranslator").text(book.translator || "-");
+        $("#bookPrice").text(book.price ? (book.price + " " + (book.currency || "")) : "-");
+        $("#bookLocation").text(book.location || "-");
+        
+        // 统计信息
+        const totalQuantity = book.totalQuantity || 0;
+        const availableQuantity = book.availableQuantity || 0;
+        const borrowedQuantity = totalQuantity - availableQuantity;
+        
+        $("#totalQuantity").text(totalQuantity);
+        $("#availableQuantity").text(availableQuantity);
+        $("#borrowedQuantity").text(borrowedQuantity);
+        $("#borrowCount").text(book.borrowCount || 0);
+        
+        // 图书描述
+        $("#bookDescriptionContent").text(book.description || "暂无图书简介");
+        
+        // 更新页面标题
+        document.title = (book.nameCn || book.nameId || "图书详情") + " - 图书管理系统";
+    }
+    
+    // 加载评论
+    function loadComments() {
+        $("#commentsContainer").html('<div class="loading" data-i18n="loading">加载中...</div>');
+        
+        $.ajax({
+            type: "GET",
+            url: "/api/bookComment/book/" + bookId,
+            data: {
+                page: currentCommentsPage,
+                size: commentsPageSize
+            },
+            success: function(result) {
+                if (result.code === 0 && result.data) {
+                    renderComments(result.data.records || []);
+                    renderCommentsPagination(result.data.total || 0, result.data.current || 1, result.data.size || commentsPageSize);
+                } else {
+                    $("#commentsContainer").html('<div class="no-comments" data-i18n="noComments">暂无评论</div>');
+                }
+            },
+            error: function() {
+                $("#commentsContainer").html('<div class="no-comments">评论加载失败</div>');
+            }
+        });
+    }
+    
+    // 渲染评论列表
+    function renderComments(comments) {
+        if (!comments || comments.length === 0) {
+            $("#commentsContainer").html('<div class="no-comments" data-i18n="noComments">暂无评论</div>');
+            return;
+        }
+        
+        let html = "";
+        comments.forEach(function(comment) {
+            const rating = comment.rating || 0;
+            const stars = generateStars(rating);
+            const createTime = comment.createTime ? new Date(comment.createTime).toLocaleDateString() : "";
+            
+            html += `
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-user">${comment.userName || "匿名用户"}</span>
+                        <span class="comment-date">${createTime}</span>
+                    </div>
+                    <div class="comment-rating">
+                        ${stars}
+                        <span style="margin-left: 5px; color: #666; font-size: 12px;">(${rating}/5)</span>
+                    </div>
+                    <div class="comment-content">${comment.content || ""}</div>
+                </div>
+            `;
+        });
+        
+        $("#commentsContainer").html(html);
+        loadLang(lang); // 重新加载语言
+    }
+    
+    // 生成星级评分HTML
+    function generateStars(rating) {
+        let stars = "";
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                stars += '<span class="star">★</span>';
+            } else {
+                stars += '<span class="star empty">☆</span>';
+            }
+        }
+        return stars;
+    }
+    
+    // 渲染评论分页
+    function renderCommentsPagination(total, current, size) {
+        const totalPages = Math.ceil(total / size);
+        $("#commentsPagination").empty();
+        
+        if (totalPages > 1) {
+            javaex.page({
+                id: "commentsPagination",
+                pageCount: totalPages,
+                currentPage: current,
+                perPageCount: size,
+                isShowJumpPage: false,
+                totalNum: total,
+                position: "center",
+                callback: function(result) {
+                    currentCommentsPage = result.pageNum;
+                    loadComments();
+                }
+            });
+        }
+    }
+</script>
+</body>
+</html>
