@@ -14,6 +14,8 @@ import com.example.demo.dto.BookExcelDto;
 import com.example.demo.entity.User;
 
 import com.example.demo.service.UserService;
+import com.example.demo.service.BookCategoryService;
+import com.example.demo.entity.BookCategory;
 import com.example.demo.vo.BookVO;
 import com.example.demo.commom.BusinessException;
 import com.example.demo.commom.ResourceNotFoundException;
@@ -50,6 +52,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     private UserContext userContext;
     @Autowired
     private UserService userService;
+    @Autowired
+    private BookCategoryService bookCategoryService;
 
 
     @Override
@@ -248,22 +252,70 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             if (CollectionUtils.isEmpty(dtos)) {
                 return Result.error("Excel 无数据");
             }
-            List<Book> books = dtos.stream().map(dto -> {
-                Book book = new Book();
-                BeanUtils.copyProperties(dto, book);
-                return book;
-            }).collect(Collectors.toList());
-
-            for (Book book : books) {
-                bookMapper.insert(book);
+            
+            List<Book> validBooks = new ArrayList<>();
+            List<String> duplicateBookNumbers = new ArrayList<>();
+            int successCount = 0;
+            
+            for (BookExcelDto dto : dtos) {
+                try {
+                    // 验证必填字段
+                    if (dto.getBookNumber() == null || dto.getBookNumber().trim().isEmpty()) {
+                        throw new RuntimeException("图书编号不能为空");
+                    }
+                    if (dto.getLanguage() == null || dto.getLanguage().trim().isEmpty()) {
+                        throw new RuntimeException("语言不能为空");
+                    }
+                    
+                    // 检查图书编号是否重复
+                    if (existsByBookNumber(dto.getBookNumber())) {
+                        duplicateBookNumbers.add(dto.getBookNumber());
+                        continue; // 跳过重复的图书编号
+                    }
+                    
+                    Book book = new Book();
+                    BeanUtils.copyProperties(dto, book);
+                    
+                    // 根据分类编码查找分类ID
+                    if (dto.getCategoryCode() != null && !dto.getCategoryCode().trim().isEmpty()) {
+                        BookCategory category = bookCategoryService.getByCode(dto.getCategoryCode());
+                        if (category != null) {
+                            book.setCategoryId(category.getId());
+                        } else {
+                            throw new RuntimeException("分类编码不存在: " + dto.getCategoryCode());
+                        }
+                    }
+                    
+                    validBooks.add(book);
+                } catch (Exception e) {
+                    return Result.error("导入失败: " + e.getMessage());
+                }
             }
-            return Result.success();
+
+            // 批量插入有效的图书
+            for (Book book : validBooks) {
+                bookMapper.insert(book);
+                successCount++;
+            }
+            
+            // 构建返回消息
+            StringBuilder message = new StringBuilder();
+            message.append("导入完成！成功导入 ").append(successCount).append(" 本图书");
+            
+            if (!duplicateBookNumbers.isEmpty()) {
+                message.append("。跳过重复图书编号: ").append(String.join(", ", duplicateBookNumbers));
+                message.append(" (共 ").append(duplicateBookNumbers.size()).append(" 本)");
+            }
+            
+            if (!duplicateBookNumbers.isEmpty()) {
+                return Result.error(message.toString());
+            } else {
+                return Result.success();
+            }
         } catch (Exception e) {
             return Result.error("导入失败: " + e.getMessage());
         }
     }
-
-
 
     @Override
     public void exportToExcel(HttpServletResponse response, String nameCn, String author, String isbn) throws IOException {

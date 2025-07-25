@@ -128,6 +128,11 @@ public class BookCategoryServiceImpl extends ServiceImpl<BookCategoryMapper,Book
     }
 
     @Override
+    public BookCategory getByCode(String code) {
+        return mapper.selectOne(new QueryWrapper<BookCategory>().eq("category_code", code));
+    }
+
+    @Override
     public void move(Integer id, Integer newParentId) {
         BookCategory e = mapper.selectById(id);
         e.setParentId(newParentId);

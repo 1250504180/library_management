@@ -55,16 +55,17 @@ CREATE TABLE `book`  (
 -- ----------------------------
 -- Records of book
 -- ----------------------------
-INSERT INTO `book` VALUES (1, 'BK20240001', '9787302523103', '人工智能导论', 'Introduction to AI', '中文', '李开复', NULL, '清华大学出版社', '2021-05-20', 88.00, 11, 'A-101', 10, 5, 36, 1, '全面介绍人工智能基础与应用。', '/uploads/ai_intro.jpg', 4.39, 'CNY', '2024-01-01 10:00:00', '2025-07-16 17:41:07');
-INSERT INTO `book` VALUES (2, 'BK20240002', '9787505715660', '时间简史', 'A Brief History of Time', '英文', 'Stephen Hawking', '许明贤', '中国社会科学出版社', '2001-09-01', 49.00, 2, 'B-202', 12, 12, 18, 1, '著名物理学家霍金的宇宙探索名作。', '/uploads/time_brief.jpg', 4.75, 'CNY', '2024-01-02 11:00:00', '2024-01-02 11:00:00');
-INSERT INTO `book` VALUES (3, 'BK20240003', '9787108030406', '史记', NULL, '中文', '司马迁', NULL, '中华书局', '2010-03-15', 66.00, 3, 'C-310', 8, 5, 12, 1, '中国第一部纪传体通史，描绘西汉以前历史。', '/uploads/shiji.jpg', 4.80, 'CNY', '2025-07-15 12:00:00', '2025-07-16 18:09:20');
-INSERT INTO `book` VALUES (4, 'BK20240004', '9787569911815', '算法图解', 'Grokking Algorithms', '中英', 'Aditya Bhargava', '王海鹏', '人民邮电出版社', '2018-04-01', 79.00, 11, 'CS-201', 15, 10, 40, 1, '通俗易懂的算法入门图书。', '/uploads/algorithms.jpg', 4.70, 'CNY', '2024-01-04 13:00:00', '2025-07-16 13:00:00');
-INSERT INTO `book` VALUES (5, 'BK20240005', '9787115470984', '深入理解计算机系统', 'CSAPP', '中英', 'Randal E. Bryant', '潘爱民', '机械工业出版社', '2017-08-01', 108.00, 11, 'CS-301', 6, 5, 21, 1, '计算机系统底层原理详解。', '/uploads/csapp.jpg', 4.50, 'CNY', '2025-07-14 14:00:00', '2025-07-16 18:09:25');
-INSERT INTO `book` VALUES (6, 'BK20240006', '9787508697925', '经济学原理', 'Principles of Economics', '中英', 'N. Gregory Mankiw', '梁小民', '中国人民大学出版社', '2015-01-01', 88.00, 5, 'E-101', 10, 10, 11, 1, '最流行的经济学入门教材之一。', '/uploads/economics.jpg', 4.20, 'CNY', '2024-01-06 15:00:00', '2025-07-13 15:00:00');
-INSERT INTO `book` VALUES (7, 'BK20240007', '9787559618854', '活着', NULL, '中文', '余华', NULL, '北京十月文艺出版社', '2017-06-01', 45.00, 1, 'L-102', 5, 5, 9, 1, '一部感人至深的人性小说。', '/uploads/huozhe.jpg', 4.90, 'CNY', '2025-07-15 16:00:00', '2025-07-16 18:09:30');
-INSERT INTO `book` VALUES (8, 'BK20240008', '9780140449266', '理想国', 'The Republic', '英文', '柏拉图', '郭斌和', 'Penguin Classics', '2003-09-01', 62.00, 4, 'P-101', 7, 6, 17, 1, '哲学经典，对正义与社会秩序的探讨。', '/uploads/republic.jpg', 4.60, 'USD', '2024-01-08 17:00:00', '2025-07-11 17:00:00');
-INSERT INTO `book` VALUES (9, 'BK20240009', '9787115351161', '图解心理学', NULL, '中文', '小林哲', NULL, '人民邮电出版社', '2019-05-01', 55.00, 10, 'PS-101', 6, 6, 5, 1, '以图文并茂方式介绍心理学知识。', '/uploads/psychology.jpg', 4.30, 'CNY', '2024-01-09 09:00:00', '2024-01-09 09:00:00');
-INSERT INTO `book` VALUES (11, 'BK20240011', '9787532149179', '围城', '', '中文', '钱钟书', '', '人民文学出版社', '2005-08-01', 36.00, 1, 'L-205', 8, 7, 19, 1, '讽刺小说经典，描述知识分子的生活状态。', '/uploads/1752658806408_login.png', 4.70, 'CNY', '2024-01-11 11:00:00', '2025-07-16 17:40:07');
+INSERT INTO library_management_new.book (book_number,isbn,name_cn,name_id,`language`,author,translator,publisher,publish_date,price,category_id,location,total_quantity,available_quantity,borrow_count,status,description,cover_image,rating_avg,translationunit,create_time,update_time) VALUES
+	 ('BK20240001','9787302523103','人工智能导论','Introduction to AI','中文','李开复','','清华大学出版社','2021-05-20',88.00,11,'A-101',10,5,36,1,'全面介绍人工智能基础与应用。','/uploads/1753254553881_61W0Wsc2d1L._UF1000,1000_QL80_.jpg',3.80,'CNY','2024-01-01 10:00:00','2025-07-23 14:09:15'),
+	 ('BK20240002','9787505715660','时间简史','A Brief History of Time','英文','Stephen Hawking','许明贤','中国社会科学出版社','2001-09-01',49.00,2,'B-202',12,12,18,1,'著名物理学家霍金的宇宙探索名作。','/uploads/1753254567734_81yf2GSHSZL._AC_UL600_SR600,600_.jpg',4.75,'CNY','2024-01-02 11:00:00','2025-07-23 14:09:29'),
+	 ('BK20240003','9787108030406','史记',NULL,'中文','司马迁',NULL,'中华书局','2010-03-15',66.00,3,'C-310',8,5,12,1,'中国第一部纪传体通史，描绘西汉以前历史。','/uploads/shiji.jpg',4.80,'CNY','2025-07-15 12:00:00','2025-07-16 18:09:20'),
+	 ('BK20240004','9787569911815','算法图解','Grokking Algorithms','','Aditya Bhargava','王海鹏','人民邮电出版社','2018-04-01',79.00,11,'CS-201',15,10,40,1,'通俗易懂的算法入门图书。','/uploads/1753254579214_s29358625.jpg',4.70,'CNY','2024-01-04 13:00:00','2025-07-23 14:09:40'),
+	 ('BK20240005','9787115470984','深入理解计算机系统','CSAPP','中英','Randal E. Bryant','潘爱民','机械工业出版社','2017-08-01',108.00,11,'CS-301',6,5,21,1,'计算机系统底层原理详解。','/uploads/csapp.jpg',4.50,'CNY','2025-07-14 14:00:00','2025-07-16 18:09:25'),
+	 ('BK20240006','9787508697925','经济学原理','Principles of Economics','中英','N. Gregory Mankiw','梁小民','中国人民大学出版社','2015-01-01',88.00,5,'E-101',10,10,11,1,'最流行的经济学入门教材之一。','/uploads/economics.jpg',4.20,'CNY','2024-01-06 15:00:00','2025-07-13 15:00:00'),
+	 ('BK20240007','9787559618854','活着',NULL,'中文','余华',NULL,'北京十月文艺出版社','2017-06-01',45.00,1,'L-102',5,5,9,1,'一部感人至深的人性小说。','/uploads/huozhe.jpg',4.90,'CNY','2025-07-15 16:00:00','2025-07-16 18:09:30'),
+	 ('BK20240008','9780140449266','理想国','The Republic','英文','柏拉图','郭斌和','Penguin Classics','2003-09-01',62.00,4,'P-101',7,6,17,1,'哲学经典，对正义与社会秩序的探讨。','/uploads/republic.jpg',4.60,'USD','2024-01-08 17:00:00','2025-07-11 17:00:00'),
+	 ('BK20240009','9787115351161','图解心理学',NULL,'中文','小林哲',NULL,'人民邮电出版社','2019-05-01',55.00,10,'PS-101',6,6,5,1,'以图文并茂方式介绍心理学知识。','/uploads/psychology.jpg',4.30,'CNY','2024-01-09 09:00:00','2024-01-09 09:00:00'),
+	 ('BK20240011','9787532149179','围城','','中文','钱钟书','','人民文学出版社','2005-08-01',36.00,1,'L-205',8,7,19,1,'讽刺小说经典，描述知识分子的生活状态。','/uploads/1752658806408_login.png',4.70,'CNY','2024-01-11 11:00:00','2025-07-16 17:40:07');
 
 -- ----------------------------
 -- Table structure for book_category
@@ -81,7 +82,6 @@ CREATE TABLE `book_category`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_category_name`(`category_name` ASC) USING BTREE,
   UNIQUE INDEX `uk_category_code`(`category_code` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '图书分类表' ROW_FORMAT = Dynamic;
 
@@ -100,7 +100,28 @@ INSERT INTO `book_category` VALUES (9, '医学', 'MED', '临床医学、中医�
 INSERT INTO `book_category` VALUES (10, '心理学', 'PSY', '心理学理论、心理治疗等', NULL, 10, 1, '2024-01-10 10:00:00', '2024-01-10 10:00:00');
 INSERT INTO `book_category` VALUES (11, '计算机', 'CS', '编程语言、算法、人工智能等', NULL, 11, 1, '2024-01-11 10:00:00', '2024-01-11 10:00:00');
 INSERT INTO `book_category` VALUES (12, '语言学', 'LING', '语言结构、语言学习、翻译研究等', NULL, 12, 1, '2024-01-12 10:00:00', '2024-01-12 10:00:00');
-
+INSERT INTO `book_category` VALUES (111, '经济/商业', '000', '经济学、金融、会计等方面书籍', NULL, 1, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (112, '农业', '100', '农业方面书籍', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1120, '现实小说', '110', '小说', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1125, '军事训练', '120', '军事训练', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1123, '幻想小说', '130', '小说', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1121, '个人成长', '140', '个人成长', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1122, '管理', '150', '管理', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1124, '政治', '160', '政治', NULL, 2, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (113, '棕榈油', '200', '棕榈油方面书籍', NULL, 3, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (114, '技术，科学，化学', '300', '技术、科学、化学方面书籍', NULL, 4, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (115, '启发', '400', '启发、激励方面书籍', NULL, 5, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (116, '语言', '500', '语言学习方面书籍', NULL, 6, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (117, '常识', '600', '常识、百科知识方面书籍', NULL, 7, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (118, '自我发展', '700', '自我发展、个人成长方面书籍', NULL, 8, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (119, '工业', '800', '工业技术方面书籍', NULL, 9, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1110, '历史', '900', '历史方面书籍', NULL, 10, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1111, '传记、自传、回忆录', '1000', '传记、自传、回忆录方面书籍', NULL, 11, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1112, '文学', '1100', '文学作品方面书籍', NULL, 12, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1113, '生存', '1200', '生存技能方面书籍', NULL, 13, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1114, '政治', '1300', '政治学方面书籍', NULL, 14, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1115, '心理学', '1400', '心理学方面书籍', NULL, 15, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
+INSERT INTO `book_category` VALUES (1116, '管理理论', '1500', '管理理论方面书籍', NULL, 16, 1, '2024-01-05 10:00:00', '2024-01-05 10:00:00');
 -- ----------------------------
 -- Table structure for book_comment
 -- ----------------------------
@@ -160,17 +181,17 @@ CREATE TABLE `book_recommendation`  (
 -- ----------------------------
 -- Records of book_recommendation
 -- ----------------------------
-INSERT INTO `book_recommendation` VALUES (2, 4, '算法图解', '2025-01', '中国文学经典，文笔细腻。', 1, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:36:14');
-INSERT INTO `book_recommendation` VALUES (3, 6, '经济学原理', '2025-02', '介绍现代经济的入门书。', 1, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:31');
-INSERT INTO `book_recommendation` VALUES (4, 1, '人工智能导论', '2025-01', '提升英语阅读能力的经典读物。', 2, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:44');
-INSERT INTO `book_recommendation` VALUES (5, 5, '深入理解计算机系统', '2025-06', '中国文学经典，文笔细腻。', 2, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:57');
-INSERT INTO `book_recommendation` VALUES (6, 4, '算法图解', '2025-01', '适合IT从业者入门与进阶。', 3, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:36:15');
-INSERT INTO `book_recommendation` VALUES (7, 3, '史记', '2025-06', '适合IT从业者入门与进阶。', 2, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:36:27');
-INSERT INTO `book_recommendation` VALUES (8, 5, '深入理解计算机系统', '2025-05', '适合IT从业者入门与进阶。', 2, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:59');
-INSERT INTO `book_recommendation` VALUES (9, 1, '人工智能导论', '2025-05', '内容紧凑，适合学生阅读。', 2, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:45');
-INSERT INTO `book_recommendation` VALUES (10, 6, '经济学原理', '2025-03', '中国文学经典，文笔细腻。', 2, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:32');
-INSERT INTO `book_recommendation` VALUES (11, 1, '人工智能导论', '2025-01', '提升英语阅读能力的经典读物。', 3, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:35:46');
-INSERT INTO `book_recommendation` VALUES (12, 5, '深入理解计算机系统', '2025-05', '内容紧凑，适合学生阅读。', 3, 'admin', NULL, '2025-07-16 17:14:06', '2025-07-16 17:44:08');
+INSERT INTO `book_recommendation` VALUES (2, 4, '算法图解', '2025-01', '中国文学经典，文笔细腻。', 1, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:36:14');
+INSERT INTO `book_recommendation` VALUES (3, 6, '经济学原理', '2025-02', '介绍现代经济的入门书。', 1, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:31');
+INSERT INTO `book_recommendation` VALUES (4, 1, '人工智能导论', '2025-01', '提升英语阅读能力的经典读物。', 2, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:44');
+INSERT INTO `book_recommendation` VALUES (5, 5, '深入理解计算机系统', '2025-06', '中国文学经典，文笔细腻。', 2, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:57');
+INSERT INTO `book_recommendation` VALUES (6, 4, '算法图解', '2025-01', '适合IT从业者入门与进阶。', 3, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:36:15');
+INSERT INTO `book_recommendation` VALUES (7, 3, '史记', '2025-06', '适合IT从业者入门与进阶。', 2, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:36:27');
+INSERT INTO `book_recommendation` VALUES (8, 5, '深入理解计算机系统', '2025-05', '适合IT从业者入门与进阶。', 2, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:59');
+INSERT INTO `book_recommendation` VALUES (9, 1, '人工智能导论', '2025-05', '内容紧凑，适合学生阅读。', 2, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:45');
+INSERT INTO `book_recommendation` VALUES (10, 6, '经济学原理', '2025-03', '中国文学经典，文笔细腻。', 2, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:32');
+INSERT INTO `book_recommendation` VALUES (11, 1, '人工智能导论', '2025-01', '提升英语阅读能力的经典读物。', 3, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:35:46');
+INSERT INTO `book_recommendation` VALUES (12, 5, '深入理解计算机系统', '2025-05', '内容紧凑，适合学生阅读。', 3, 'admin', NULL, 1, '2025-07-16 17:14:06', '2025-07-16 17:44:08');
 
 -- ----------------------------
 -- Table structure for lend_record

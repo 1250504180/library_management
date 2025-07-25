@@ -23,6 +23,7 @@ public interface BookCategoryService extends IService<BookCategory> {
 
     boolean existsCode(String code);
     boolean existsName(String name);
+    BookCategory getByCode(String code);
 
     void move(Integer id, Integer newParentId);
     void sort(Integer id, Integer newOrder);

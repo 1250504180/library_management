@@ -42,7 +42,6 @@ uploads/
 .mvn/
 mvnw
 mvnw.cmd
-
 # Gradle
 .gradle/
 build/
@@ -70,3 +69,4 @@ coverage/
 *.pid
 *.seed
 *.pid.lock
+*.xlsx

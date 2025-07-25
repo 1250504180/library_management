@@ -42,8 +42,8 @@ public class BookExcelDto {
     @ExcelProperty("定价")
     private BigDecimal price;
 
-    @ExcelProperty("分类ID")
-    private Integer categoryId;
+    @ExcelProperty("分类编码")
+    private String categoryCode;
 
     @ExcelProperty("位置")
     private String location;
