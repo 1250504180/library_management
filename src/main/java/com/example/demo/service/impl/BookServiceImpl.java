@@ -40,6 +40,8 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -186,6 +188,38 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                 .count();
         return count != null && count > 0;
     }
+    
+    /**
+     * 检查图书是否重复（综合判断：图书编号、中文书名、英文书名、作者、语言）
+     * @param bookNumber 图书编号
+     * @param nameCn 中文书名
+     * @param nameId 英文书名/书名ID
+     * @param author 作者
+     * @param language 语言
+     * @return 重复的图书信息，如果不重复返回null
+     */
+    public Book findDuplicateBook(String bookNumber, String nameCn, String nameId, String author, String language) {
+        LambdaQueryWrapper<Book> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Book::getBookNumber, bookNumber)
+               .eq(Book::getLanguage, language);
+        
+        // 如果中文书名不为空，加入查询条件
+        if (nameCn != null && !nameCn.trim().isEmpty()) {
+            wrapper.eq(Book::getNameCn, nameCn);
+        }
+        
+        // 如果英文书名不为空，也加入查询条件
+        if (nameId != null && !nameId.trim().isEmpty()) {
+            wrapper.eq(Book::getNameId, nameId);
+        }
+        
+        // 如果作者不为空，也加入查询条件
+        if (author != null && !author.trim().isEmpty()) {
+            wrapper.eq(Book::getAuthor, author);
+        }
+        
+        return baseMapper.selectOne(wrapper);
+    }
 
     @Override
     @Transactional
@@ -254,7 +288,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             }
             
             List<Book> validBooks = new ArrayList<>();
-            List<String> duplicateBookNumbers = new ArrayList<>();
+            List<Map<String, Object>> duplicateBooks = new ArrayList<>();
             int successCount = 0;
             
             for (BookExcelDto dto : dtos) {
@@ -266,11 +300,27 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                     if (dto.getLanguage() == null || dto.getLanguage().trim().isEmpty()) {
                         throw new RuntimeException("语言不能为空");
                     }
+                    // 至少需要有中文书名或英文书名其中之一
+                    if ((dto.getNameCn() == null || dto.getNameCn().trim().isEmpty()) && 
+                        (dto.getNameId() == null || dto.getNameId().trim().isEmpty())) {
+                        throw new RuntimeException("中文书名和英文书名至少需要填写一个");
+                    }
+
                     
-                    // 检查图书编号是否重复
-                    if (existsByBookNumber(dto.getBookNumber())) {
-                        duplicateBookNumbers.add(dto.getBookNumber());
-                        continue; // 跳过重复的图书编号
+                    // 检查图书是否重复（综合判断）
+                    Book existingBook = findDuplicateBook(dto.getBookNumber(), dto.getNameCn(), 
+                                                         dto.getNameId(), dto.getAuthor(), dto.getLanguage());
+                    if (existingBook != null) {
+                        // 收集重复图书信息
+                        Map<String, Object> duplicateInfo = new HashMap<>();
+                        duplicateInfo.put("bookNumber", dto.getBookNumber());
+                        duplicateInfo.put("nameCn", dto.getNameCn());
+                        duplicateInfo.put("nameId", dto.getNameId());
+                        duplicateInfo.put("author", dto.getAuthor());
+                        duplicateInfo.put("language", dto.getLanguage());
+                        duplicateInfo.put("existingId", existingBook.getId());
+                        duplicateBooks.add(duplicateInfo);
+                        continue; // 跳过重复的图书
                     }
                     
                     Book book = new Book();
@@ -292,26 +342,87 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                 }
             }
 
+            // 如果有重复图书，返回重复信息供前端确认
+            if (!duplicateBooks.isEmpty()) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("hasDuplicates", true);
+                result.put("duplicateBooks", duplicateBooks);
+                result.put("validBooksCount", validBooks.size());
+                result.put("message", "检测到 " + duplicateBooks.size() + " 本重复图书，请确认是否继续导入其他 " + validBooks.size() + " 本图书");
+                return Result.success(result);
+            }
+            
             // 批量插入有效的图书
             for (Book book : validBooks) {
                 bookMapper.insert(book);
                 successCount++;
             }
             
-            // 构建返回消息
-            StringBuilder message = new StringBuilder();
-            message.append("导入完成！成功导入 ").append(successCount).append(" 本图书");
+            return Result.success("导入完成！成功导入 " + successCount + " 本图书");
+        } catch (Exception e) {
+            return Result.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<?> confirmImportFromExcel(MultipartFile file) {
+        try {
+            List<BookExcelDto> dtos = EasyExcel.read(file.getInputStream(), BookExcelDto.class, null).sheet().doReadSync();
+            if (CollectionUtils.isEmpty(dtos)) {
+                return Result.error("Excel 无数据");
+            }
+
+            List<Book> validBooks = new ArrayList<>();
+            int successCount = 0;
             
-            if (!duplicateBookNumbers.isEmpty()) {
-                message.append("。跳过重复图书编号: ").append(String.join(", ", duplicateBookNumbers));
-                message.append(" (共 ").append(duplicateBookNumbers.size()).append(" 本)");
+            for (BookExcelDto dto : dtos) {
+                try {
+                    // 验证必填字段
+                    if (dto.getBookNumber() == null || dto.getBookNumber().trim().isEmpty()) {
+                        throw new RuntimeException("图书编号不能为空");
+                    }
+                    if (dto.getLanguage() == null || dto.getLanguage().trim().isEmpty()) {
+                        throw new RuntimeException("语言不能为空");
+                    }
+                    // 至少需要有中文书名或英文书名其中之一
+                    if ((dto.getNameCn() == null || dto.getNameCn().trim().isEmpty()) && 
+                        (dto.getNameId() == null || dto.getNameId().trim().isEmpty())) {
+                        throw new RuntimeException("中文书名和英文书名至少需要填写一个");
+                    }
+                    
+                    // 检查图书是否重复（综合判断），如果重复则跳过
+                    Book existingBook = findDuplicateBook(dto.getBookNumber(), dto.getNameCn(), 
+                                                         dto.getNameId(), dto.getAuthor(), dto.getLanguage());
+                    if (existingBook != null) {
+                        continue; // 跳过重复的图书
+                    }
+                    
+                    Book book = new Book();
+                    BeanUtils.copyProperties(dto, book);
+                    
+                    // 根据分类编码查找分类ID
+                    if (dto.getCategoryCode() != null && !dto.getCategoryCode().trim().isEmpty()) {
+                        BookCategory category = bookCategoryService.getByCode(dto.getCategoryCode());
+                        if (category != null) {
+                            book.setCategoryId(category.getId());
+                        } else {
+                            throw new RuntimeException("分类编码不存在: " + dto.getCategoryCode());
+                        }
+                    }
+                    
+                    validBooks.add(book);
+                } catch (Exception e) {
+                    return Result.error("导入失败: " + e.getMessage());
+                }
             }
             
-            if (!duplicateBookNumbers.isEmpty()) {
-                return Result.error(message.toString());
-            } else {
-                return Result.success();
+            // 批量插入有效的图书
+            for (Book book : validBooks) {
+                bookMapper.insert(book);
+                successCount++;
             }
+            
+            return Result.success("导入完成！成功导入 " + successCount + " 本图书");
         } catch (Exception e) {
             return Result.error("导入失败: " + e.getMessage());
         }

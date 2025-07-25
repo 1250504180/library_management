@@ -30,6 +30,7 @@ public interface BookService extends IService<Book> {
     BookVO getDetail(Long id);
     Page<BookVO> searchBooks(String keyword, int page, int size);
     Result<?> importFromExcel(MultipartFile file);
+    Result<?> confirmImportFromExcel(MultipartFile file);
 
     void exportToExcel(HttpServletResponse response, String nameCn, String author, String isbn) throws IOException;
 //    void recalculateRating(Long id);

@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `book`;
 CREATE TABLE `book`  (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '图书ID',
   `book_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '图书编号',
-  `isbn` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'ISBN号',
+  `isbn` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL default null COMMENT 'ISBN号',
   `name_cn` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '中文书名',
   `name_id` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '外语书名',
   `language` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '书的语言',
@@ -46,26 +46,23 @@ CREATE TABLE `book`  (
   `translationunit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '币种单位',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `book_number`(`book_number` ASC) USING BTREE,
-  UNIQUE INDEX `isbn`(`isbn` ASC) USING BTREE,
-  INDEX `idx_category_id`(`category_id` ASC) USING BTREE
+  PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '图书信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of book
 -- ----------------------------
-INSERT INTO library_management_new.book (book_number,isbn,name_cn,name_id,`language`,author,translator,publisher,publish_date,price,category_id,location,total_quantity,available_quantity,borrow_count,status,description,cover_image,rating_avg,translationunit,create_time,update_time) VALUES
-	 ('BK20240001','9787302523103','人工智能导论','Introduction to AI','中文','李开复','','清华大学出版社','2021-05-20',88.00,11,'A-101',10,5,36,1,'全面介绍人工智能基础与应用。','/uploads/1753254553881_61W0Wsc2d1L._UF1000,1000_QL80_.jpg',3.80,'CNY','2024-01-01 10:00:00','2025-07-23 14:09:15'),
-	 ('BK20240002','9787505715660','时间简史','A Brief History of Time','英文','Stephen Hawking','许明贤','中国社会科学出版社','2001-09-01',49.00,2,'B-202',12,12,18,1,'著名物理学家霍金的宇宙探索名作。','/uploads/1753254567734_81yf2GSHSZL._AC_UL600_SR600,600_.jpg',4.75,'CNY','2024-01-02 11:00:00','2025-07-23 14:09:29'),
-	 ('BK20240003','9787108030406','史记',NULL,'中文','司马迁',NULL,'中华书局','2010-03-15',66.00,3,'C-310',8,5,12,1,'中国第一部纪传体通史，描绘西汉以前历史。','/uploads/shiji.jpg',4.80,'CNY','2025-07-15 12:00:00','2025-07-16 18:09:20'),
-	 ('BK20240004','9787569911815','算法图解','Grokking Algorithms','','Aditya Bhargava','王海鹏','人民邮电出版社','2018-04-01',79.00,11,'CS-201',15,10,40,1,'通俗易懂的算法入门图书。','/uploads/1753254579214_s29358625.jpg',4.70,'CNY','2024-01-04 13:00:00','2025-07-23 14:09:40'),
-	 ('BK20240005','9787115470984','深入理解计算机系统','CSAPP','中英','Randal E. Bryant','潘爱民','机械工业出版社','2017-08-01',108.00,11,'CS-301',6,5,21,1,'计算机系统底层原理详解。','/uploads/csapp.jpg',4.50,'CNY','2025-07-14 14:00:00','2025-07-16 18:09:25'),
-	 ('BK20240006','9787508697925','经济学原理','Principles of Economics','中英','N. Gregory Mankiw','梁小民','中国人民大学出版社','2015-01-01',88.00,5,'E-101',10,10,11,1,'最流行的经济学入门教材之一。','/uploads/economics.jpg',4.20,'CNY','2024-01-06 15:00:00','2025-07-13 15:00:00'),
-	 ('BK20240007','9787559618854','活着',NULL,'中文','余华',NULL,'北京十月文艺出版社','2017-06-01',45.00,1,'L-102',5,5,9,1,'一部感人至深的人性小说。','/uploads/huozhe.jpg',4.90,'CNY','2025-07-15 16:00:00','2025-07-16 18:09:30'),
-	 ('BK20240008','9780140449266','理想国','The Republic','英文','柏拉图','郭斌和','Penguin Classics','2003-09-01',62.00,4,'P-101',7,6,17,1,'哲学经典，对正义与社会秩序的探讨。','/uploads/republic.jpg',4.60,'USD','2024-01-08 17:00:00','2025-07-11 17:00:00'),
-	 ('BK20240009','9787115351161','图解心理学',NULL,'中文','小林哲',NULL,'人民邮电出版社','2019-05-01',55.00,10,'PS-101',6,6,5,1,'以图文并茂方式介绍心理学知识。','/uploads/psychology.jpg',4.30,'CNY','2024-01-09 09:00:00','2024-01-09 09:00:00'),
-	 ('BK20240011','9787532149179','围城','','中文','钱钟书','','人民文学出版社','2005-08-01',36.00,1,'L-205',8,7,19,1,'讽刺小说经典，描述知识分子的生活状态。','/uploads/1752658806408_login.png',4.70,'CNY','2024-01-11 11:00:00','2025-07-16 17:40:07');
+INSERT INTO library_management_new.book (id,book_number,isbn,name_cn,name_id,`language`,author,translator,publisher,publish_date,price,category_id,location,total_quantity,available_quantity,borrow_count,status,description,cover_image,rating_avg,translationunit,create_time,update_time) VALUES
+	 (1,'BK20240001','9787302523103','人工智能导论','Introduction to AI','中文','李开复','','清华大学出版社','2021-05-20',88.00,11,'A-101',10,5,36,1,'全面介绍人工智能基础与应用。','/uploads/1753254553881_61W0Wsc2d1L._UF1000,1000_QL80_.jpg',3.80,'CNY','2024-01-01 10:00:00','2025-07-23 14:09:15'),
+	 (2,'BK20240002','9787505715660','时间简史','A Brief History of Time','英文','Stephen Hawking','许明贤','中国社会科学出版社','2001-09-01',49.00,2,'B-202',12,12,18,1,'著名物理学家霍金的宇宙探索名作。','/uploads/1753254567734_81yf2GSHSZL._AC_UL600_SR600,600_.jpg',4.75,'CNY','2024-01-02 11:00:00','2025-07-23 14:09:29'),
+	 (3,'BK20240003','9787108030406','史记',NULL,'中文','司马迁',NULL,'中华书局','2010-03-15',66.00,3,'C-310',8,5,12,1,'中国第一部纪传体通史，描绘西汉以前历史。','/uploads/shiji.jpg',4.80,'CNY','2025-07-15 12:00:00','2025-07-16 18:09:20'),
+	 (4,'BK20240004','9787569911815','算法图解','Grokking Algorithms','','Aditya Bhargava','王海鹏','人民邮电出版社','2018-04-01',79.00,11,'CS-201',15,10,40,1,'通俗易懂的算法入门图书。','/uploads/1753254579214_s29358625.jpg',4.70,'CNY','2024-01-04 13:00:00','2025-07-23 14:09:40'),
+	 (5,'BK20240005','9787115470984','深入理解计算机系统','CSAPP','中英','Randal E. Bryant','潘爱民','机械工业出版社','2017-08-01',108.00,11,'CS-301',6,5,21,1,'计算机系统底层原理详解。','/uploads/csapp.jpg',4.50,'CNY','2025-07-14 14:00:00','2025-07-16 18:09:25'),
+	 (6,'BK20240006','9787508697925','经济学原理','Principles of Economics','中英','N. Gregory Mankiw','梁小民','中国人民大学出版社','2015-01-01',88.00,5,'E-101',10,10,11,1,'最流行的经济学入门教材之一。','/uploads/economics.jpg',4.20,'CNY','2024-01-06 15:00:00','2025-07-13 15:00:00'),
+	 (7,'BK20240007','9787559618854','活着',NULL,'中文','余华',NULL,'北京十月文艺出版社','2017-06-01',45.00,1,'L-102',5,5,9,1,'一部感人至深的人性小说。','/uploads/huozhe.jpg',4.90,'CNY','2025-07-15 16:00:00','2025-07-16 18:09:30'),
+	 (8,'BK20240008','9780140449266','理想国','The Republic','英文','柏拉图','郭斌和','Penguin Classics','2003-09-01',62.00,4,'P-101',7,6,17,1,'哲学经典，对正义与社会秩序的探讨。','/uploads/republic.jpg',4.60,'USD','2024-01-08 17:00:00','2025-07-11 17:00:00'),
+	 (9,'BK20240009','9787115351161','图解心理学',NULL,'中文','小林哲',NULL,'人民邮电出版社','2019-05-01',55.00,10,'PS-101',6,6,5,1,'以图文并茂方式介绍心理学知识。','/uploads/psychology.jpg',4.30,'CNY','2024-01-09 09:00:00','2024-01-09 09:00:00'),
+	 (10,'BK20240011','9787532149179','围城','','中文','钱钟书','','人民文学出版社','2005-08-01',36.00,1,'L-205',8,7,19,1,'讽刺小说经典，描述知识分子的生活状态。','/uploads/1752658806408_login.png',4.70,'CNY','2024-01-11 11:00:00','2025-07-16 17:40:07');
 
 -- ----------------------------
 -- Table structure for book_category

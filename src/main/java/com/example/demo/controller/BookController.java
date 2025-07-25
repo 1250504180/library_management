@@ -186,6 +186,17 @@ public class BookController {
     }
 
     /**
+     * 确认导入非重复图书
+     * @param file
+     * @return
+     */
+    @LogExecution
+    @PostMapping("/import/confirm")
+    public Result<?> confirmImportExcel(@RequestParam("file") MultipartFile file) {
+        return bookService.confirmImportFromExcel(file);
+    }
+
+    /**
      *
      * @param response
      * @param nameCn

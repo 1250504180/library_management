@@ -165,11 +165,15 @@ public class BookRecommendationServiceImpl extends ServiceImpl<BookRecommendatio
         if (StringUtils.isNotBlank(keyword)) {
             wrapper.and(w -> {
                 w.like(BookRecommendation::getRecommendReason, keyword)
-                        .or().like(BookRecommendation::getRecommendMonth, keyword);
+                        .or().like(BookRecommendation::getRecommendMonth, keyword)
+                        .or().like(BookRecommendation::getNameCn, keyword); // 添加中文书名搜索
 
                 if (keyword.matches("\\d+")) {
                     w.or().eq(BookRecommendation::getBookId, Integer.valueOf(keyword));
                 }
+                
+                // 通过关联Book表搜索外语书名
+                w.or().exists("SELECT 1 FROM book b WHERE b.id = book_recommendation.book_id AND b.name_id LIKE CONCAT('%', '" + keyword + "', '%')");
             });
         }
 

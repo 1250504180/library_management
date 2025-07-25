@@ -238,7 +238,7 @@
         
         <div class="search-section">
             <div class="search-form">
-                <input id="keyword" type="text" class="search-input" data-i18n-placeholder="recommendationKeywordPlaceholder" placeholder="搜索书籍名称、推荐理由或月份..." />
+                <input id="keyword" type="text" class="search-input" data-i18n-placeholder="unifiedSearchPlaceholder" placeholder="搜索书籍名称（中文/外语）、推荐理由或月份..." />
                 <button id="searchBtn" class="search-btn" onclick="search();" data-i18n="search">搜索</button>
             </div>
         </div>
@@ -316,6 +316,10 @@
         
         sortedRecommendations.forEach(function(rec) {
             var imageUrl = rec.imgUrl || '';
+            var bookName = rec.bookName || '未知书名';
+            var recommendReason = rec.recommendReason || '暂无推荐理由';
+            var recommendMonth = rec.recommendMonth || '';
+            var createTime = rec.createTime || '';
             
             html += '<div class="book-card">';
             
